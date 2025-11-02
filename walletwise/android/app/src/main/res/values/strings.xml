@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">walletwise</string>
+    <string name="title_activity_main">walletwise</string>
+    <string name="package_name">com.walletwise.app</string>
+    <string name="custom_url_scheme">com.walletwise.app</string>
+</resources>

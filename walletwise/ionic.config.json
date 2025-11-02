@@ -1,0 +1,7 @@
+{
+  "name": "walletwise",
+  "type": "react-vite",
+  "integrations": {
+    "capacitor": {}
+  }
+}
