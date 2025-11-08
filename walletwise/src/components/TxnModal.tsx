@@ -23,30 +23,17 @@ import {
 import type { Transaction, TransactionInput, TransactionType } from '../types/transaction';
 import { addTransaction, updateTransaction } from '../services/db';
 import { useTxnStore } from '../state/useTxnStore';
+import { useAuthStore } from '../state/useAuthStore';
+import { useCategories } from '../features/categories/useCategories';
+import type { Category } from '../types/category';
 
-const CATEGORY_OPTIONS: Record<
-  TransactionType,
-  Array<{ value: string; label: string; subcategories: string[] }>
-> = {
-  income: [
-    { value: 'Salary', label: 'Salary', subcategories: ['Base Pay', 'Bonus', 'Commission'] },
-    { value: 'Investments', label: 'Investments', subcategories: ['Dividends', 'Interest', 'Gains'] },
-    { value: 'Side Hustle', label: 'Side Hustle', subcategories: ['Freelance', 'Rental', 'Marketplace'] },
-    { value: 'Other Income', label: 'Other Income', subcategories: ['Gift', 'Refund', 'Misc'] },
-  ],
-  expense: [
-    { value: 'Housing', label: 'Housing', subcategories: ['Rent', 'Mortgage', 'Utilities'] },
-    { value: 'Food', label: 'Food', subcategories: ['Groceries', 'Dining', 'Coffee'] },
-    { value: 'Transport', label: 'Transport', subcategories: ['Fuel', 'Ride Share', 'Transit'] },
-    { value: 'Lifestyle', label: 'Lifestyle', subcategories: ['Shopping', 'Travel', 'Entertainment'] },
-    { value: 'Other Expense', label: 'Other Expense', subcategories: ['Medical', 'Education', 'Misc'] },
-  ],
-};
+// Category options are sourced from Firestore via useCategories (seeded on first run)
 
 interface TxnModalProps {
   isOpen: boolean;
   mode: 'create' | 'edit';
   transaction?: Transaction;
+  initialDate?: Date; // optional: prefill date for quick-add
   onDismiss: () => void;
   onSuccess: (message: string) => void;
   onError: (message: string) => void;
@@ -61,12 +48,11 @@ interface FormState {
   dateIso: string;
 }
 
-const buildInitialState = (transaction?: Transaction): FormState => {
-  const baseDate = transaction?.date ?? new Date();
+const buildInitialState = (transaction?: Transaction, initialDate?: Date): FormState => {
+  const baseDate = transaction?.date ?? initialDate ?? new Date();
   const type = transaction?.type ?? 'expense';
-  const categories = CATEGORY_OPTIONS[type];
-  const defaultCategory = transaction?.category ?? categories[0]?.value ?? 'General';
-  const defaultSub = transaction?.subcategory ?? categories[0]?.subcategories[0] ?? 'General';
+  const defaultCategory = transaction?.category ?? 'General';
+  const defaultSub = transaction?.subcategory ?? 'General';
 
   return {
     type,
@@ -82,11 +68,14 @@ export const TxnModal: React.FC<TxnModalProps> = ({
   isOpen,
   mode,
   transaction,
+  initialDate,
   onDismiss,
   onSuccess,
   onError,
 }) => {
-  const [form, setForm] = useState<FormState>(buildInitialState(transaction));
+  const { user } = useAuthStore();
+  const { items: allCategories } = useCategories(user?.uid);
+  const [form, setForm] = useState<FormState>(buildInitialState(transaction, initialDate));
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -97,45 +86,52 @@ export const TxnModal: React.FC<TxnModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      setForm(buildInitialState(transaction));
+      setForm(buildInitialState(transaction, initialDate));
       setFormError(null);
     }
-  }, [isOpen, transaction]);
+  }, [isOpen, transaction, initialDate]);
 
-  const availableCategories = useMemo(
-    () => CATEGORY_OPTIONS[form.type],
-    [form.type],
-  );
+  const availableCategories = useMemo(() => {
+    const filtered = allCategories.filter((c) => c.type === form.type);
+    // Fallback to a generic category if none loaded yet
+    if (filtered.length === 0) {
+      const generic: Category = { id: 'generic', name: 'General', type: form.type, subcategories: ['General'] };
+      return [generic];
+    }
+    return filtered;
+  }, [allCategories, form.type]);
 
   useEffect(() => {
-    if (!availableCategories.some((item) => item.value === form.category)) {
+    if (!availableCategories.some((item) => item.name === form.category)) {
       const fallback = availableCategories[0];
       setForm((prev) => ({
         ...prev,
-        category: fallback?.value ?? 'General',
-        subcategory: fallback?.subcategories[0] ?? 'General',
+        category: fallback?.name ?? 'General',
+        subcategory: (fallback?.subcategories && fallback.subcategories[0]) ?? 'General',
       }));
     }
   }, [availableCategories, form.category]);
 
   useEffect(() => {
-    const categoryConfig = availableCategories.find((c) => c.value === form.category);
-    if (categoryConfig && !categoryConfig.subcategories.includes(form.subcategory)) {
+    const categoryConfig = availableCategories.find((c) => c.name === form.category);
+    const subs = categoryConfig?.subcategories ?? [];
+    if (!subs.includes(form.subcategory)) {
       setForm((prev) => ({
         ...prev,
-        subcategory: categoryConfig.subcategories[0] ?? 'General',
+        subcategory: subs[0] ?? 'General',
       }));
     }
   }, [availableCategories, form.category, form.subcategory]);
 
   const handleTypeChange = (value: string) => {
     if (value === 'income' || value === 'expense') {
-      const categories = CATEGORY_OPTIONS[value];
+      const newCats = allCategories.filter((c) => c.type === value);
+      const first = newCats[0];
       setForm((prev) => ({
         ...prev,
         type: value,
-        category: categories[0]?.value ?? 'General',
-        subcategory: categories[0]?.subcategories[0] ?? 'General',
+        category: first?.name ?? 'General',
+        subcategory: (first?.subcategories && first.subcategories[0]) ?? 'General',
       }));
     }
   };
@@ -296,8 +292,8 @@ export const TxnModal: React.FC<TxnModalProps> = ({
               }
             >
               {availableCategories.map((cat) => (
-                <IonSelectOption key={cat.value} value={cat.value}>
-                  {cat.label}
+                <IonSelectOption key={cat.id} value={cat.name}>
+                  {cat.name}
                 </IonSelectOption>
               ))}
             </IonSelect>
@@ -314,7 +310,7 @@ export const TxnModal: React.FC<TxnModalProps> = ({
                 }))
               }
             >
-              {(availableCategories.find((cat) => cat.value === form.category)?.subcategories ?? []).map(
+              {(availableCategories.find((cat) => cat.name === form.category)?.subcategories ?? ['General']).map(
                 (sub) => (
                   <IonSelectOption key={sub} value={sub}>
                     {sub}

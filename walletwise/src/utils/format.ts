@@ -1,4 +1,5 @@
 import type { Transaction, TransactionType } from '../types/transaction';
+import { useSettings } from '../state/settings';
 
 const monthFormatter = new Intl.DateTimeFormat(undefined, {
   month: 'long',
@@ -16,9 +17,9 @@ const timeFormatter = new Intl.DateTimeFormat(undefined, {
   minute: '2-digit',
 });
 
-const currencyFormatter = new Intl.NumberFormat(undefined, {
+const currencyFormatterFor = (code: string) => new Intl.NumberFormat(undefined, {
   style: 'currency',
-  currency: 'USD',
+  currency: code,
   minimumFractionDigits: 2,
 });
 
@@ -28,7 +29,17 @@ export const formatDayLabel = (date: Date): string => dayFormatter.format(date);
 
 export const formatTime = (date: Date): string => timeFormatter.format(date);
 
-export const formatCurrency = (value: number): string => currencyFormatter.format(value);
+export const formatCurrency = (value: number): string => {
+  const code = useSettings.getState().currency || 'USD';
+  return currencyFormatterFor(code).format(value);
+};
+
+const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+});
+
+export const formatDateTime = (date: Date): string => dateTimeFormatter.format(date);
 
 export const formatSignedAmount = (type: TransactionType, amount: number): string => {
   const formatted = formatCurrency(amount);

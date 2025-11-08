@@ -1,0 +1,82 @@
+.section {
+  margin-bottom: 16px; /* 2 x 8px */
+}
+
+.topCard {
+  margin-bottom: 16px;
+}
+
+.summaryValue {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.summarySubtext {
+  color: var(--ion-color-medium);
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+@media (min-width: 576px) {
+  .statsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.accountsSection {
+  margin-top: 16px;
+}
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 768px) {
+  .kpiGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.sectionCard {
+  margin-bottom: 16px;
+}
+
+.chipTabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chipTabs button {
+  padding: 6px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--ion-color-medium-tint);
+  background: var(--ion-color-step-100, #f2f2f4);
+}
+
+.chipTabs button.active {
+  background: var(--ion-color-primary);
+  color: white;
+  border-color: var(--ion-color-primary);
+}
+
+.listItemRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.categoryLegend {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 12px;
+  margin-top: 8px;
+  font-size: 12px;
+}

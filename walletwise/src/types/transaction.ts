@@ -4,6 +4,7 @@ export interface Transaction {
   id: string;
   type: TransactionType;
   amount: number;
+  accountId?: string; // optional link to account
   category: string;
   subcategory: string;
   note?: string;
@@ -15,6 +16,7 @@ export interface Transaction {
 export interface TransactionInput {
   type: TransactionType;
   amount: number;
+  accountId?: string;
   category: string;
   subcategory: string;
   note?: string;

@@ -1,11 +1,63 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /users/{uid}/transactions/{txId} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
     }
-    match /users/{uid}/profile/{docId} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+
+    // Transactions
+    match /users/{uid}/transactions/{txId} {
+      allow read: if isOwner(uid);
+      allow create, update: if isOwner(uid) && validTransaction(request.resource.data);
+      allow delete: if isOwner(uid);
+    }
+
+    // Accounts
+    match /users/{uid}/accounts/{accId} {
+      allow read: if isOwner(uid);
+      allow create, update: if isOwner(uid) && validAccount(request.resource.data);
+      allow delete: if isOwner(uid);
+    }
+
+    // Bills
+    match /users/{uid}/bills/{billId} {
+      allow read: if isOwner(uid);
+      allow create, update: if isOwner(uid) && validBill(request.resource.data);
+      allow delete: if isOwner(uid);
+    }
+
+    // Categories
+    match /users/{uid}/categories/{catId} {
+      allow read: if isOwner(uid);
+      allow create, update: if isOwner(uid) && validCategory(request.resource.data);
+      allow delete: if isOwner(uid);
+    }
+
+    function validTransaction(d) {
+      return (d.type == 'income' || d.type == 'expense')
+        && ((d.amount is int) || (d.amount is float)) && d.amount > 0
+        && (d.date is timestamp);
+    }
+
+    function validAccount(d) {
+      return (d.name is string)
+        && (d.type == 'bank' || d.type == 'ewallet' || d.type == 'cash' || d.type == 'credit')
+        && ((d.balanceCurrent is int) || (d.balanceCurrent is float));
+    }
+
+    function validBill(d) {
+      return (d.name is string)
+        && ((d.amount is int) || (d.amount is float)) && d.amount > 0
+        && (d.dueDate is timestamp)
+        && (d.repeat == 'none' || d.repeat == 'monthly' || d.repeat == 'yearly')
+        && (d.accountId is string)
+        && (d.status == 'unpaid' || d.status == 'scheduled' || d.status == 'paid');
+    }
+
+    function validCategory(d) {
+      return (d.name is string)
+        && (d.type == 'income' || d.type == 'expense')
+        && (d.subcategories is list || !("subcategories" in d));
     }
   }
 }

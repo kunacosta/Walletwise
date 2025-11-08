@@ -7,11 +7,10 @@ import { TxnItem } from './TxnItem';
 interface DaySectionProps {
   date: Date;
   items: Transaction[];
-  onEdit: (transaction: Transaction) => void;
-  onDelete: (transaction: Transaction) => void;
+  onView: (transaction: Transaction) => void;
 }
 
-export const DaySection: React.FC<DaySectionProps> = ({ date, items, onEdit, onDelete }) => {
+export const DaySection: React.FC<DaySectionProps> = ({ date, items, onView }) => {
   const totals = items.reduce(
     (acc, txn) => {
       if (txn.type === 'income') {
@@ -40,12 +39,7 @@ export const DaySection: React.FC<DaySectionProps> = ({ date, items, onEdit, onD
         </div>
       </IonListHeader>
       {items.map((item) => (
-        <TxnItem
-          key={item.id}
-          transaction={item}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
+        <TxnItem key={item.id} transaction={item} onView={onView} />
       ))}
     </>
   );

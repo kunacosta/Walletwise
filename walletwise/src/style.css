@@ -4,13 +4,93 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Brand tokens */
+  --app-color-navy: #19324a;
+  --app-color-mint: #2ec4b6;
+  --app-color-surface: #ffffff;
+  --app-color-surface-alt: #f8fafc;
+  --app-color-text: #0f172a;
+  --app-color-text-subtle: #64748b;
+  --app-radius-sm: 8px;
+  --app-radius-md: 12px;
+  --app-shadow-1: 0 1px 2px rgba(0,0,0,0.06);
+  --app-shadow-2: 0 6px 16px rgba(0,0,0,0.08);
+
+  /* Map to Ionic variables */
+  --ion-color-primary: var(--app-color-navy);
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-secondary: var(--app-color-mint);
+  --ion-color-secondary-contrast: #062522;
+  --ion-color-success: #16a34a;
+  --ion-color-danger: #dc2626;
+  --ion-color-warning: #f59e0b;
+  --ion-color-medium: #475569; /* higher-contrast medium text */
+  --ion-background-color: var(--app-color-surface-alt);
+  --ion-text-color: var(--app-color-text);
+
+  /* Surfaces for components (light) */
+  --ion-toolbar-background: var(--app-color-surface);
+  --ion-tab-bar-background: var(--app-color-surface);
+  --ion-card-background: var(--app-color-surface);
+  --ion-item-background: var(--app-color-surface);
+  --ion-border-color: #e2e8f0;
 }
 
 body {
   margin: 0;
   font-family: var(--ion-font-family, 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif);
-  background-color: var(--ion-background-color, #f6f7f9);
-  color: var(--ion-text-color, #1d1e20);
+  background-color: var(--ion-background-color);
+  color: var(--ion-text-color);
+}
+
+/* Ensure Ionic components inherit readable text color */
+ion-content, ion-item, ion-label, ion-input, ion-select, ion-text, ion-note, ion-title, ion-card, ion-card-title, ion-card-subtitle {
+  color: var(--ion-text-color);
+}
+ion-note { color: var(--ion-color-medium); }
+ion-text[color="medium"] { color: var(--ion-color-medium) !important; }
+
+/* Input/placeholder contrast */
+ion-input, ion-textarea {
+  --color: var(--ion-text-color);
+  --placeholder-color: color-mix(in oklab, var(--ion-text-color) 60%, transparent);
+}
+ion-select { --placeholder-color: var(--ion-color-medium); }
+
+/* Dark theme */
+body.dark {
+  --ion-background-color: #0b1220;
+  --ion-text-color: #e5e7eb;
+  --app-color-surface: #0f172a;
+  --app-color-surface-alt: #0b1220;
+  --app-color-text: #e5e7eb;
+  --app-color-text-subtle: #a8b1c0;
+  --ion-color-primary: #1f3a5c;
+  --ion-color-secondary: #2ec4b6;
+  --ion-color-medium: #a8b1c0;
+  --ion-toolbar-background: var(--app-color-surface);
+  --ion-tab-bar-background: var(--app-color-surface);
+  --ion-card-background: var(--app-color-surface);
+  --ion-item-background: var(--app-color-surface);
+  --ion-border-color: rgba(148, 163, 184, 0.24);
+}
+
+/* Tab bar contrast and selection color */
+ion-tab-bar {
+  --background: var(--ion-tab-bar-background);
+  border-top: 1px solid var(--ion-border-color);
+}
+ion-tab-button {
+  --color: var(--ion-color-medium);            /* unselected label/icon */
+  --color-selected: var(--ion-text-color);     /* selected label/icon */
+  --ripple-color: color-mix(in oklab, var(--ion-color-primary) 35%, transparent);
+  --padding-start: 6px;
+  --padding-end: 6px;
+}
+ion-tab-button[aria-selected="true"] {
+  --color: var(--ion-text-color);
+  font-weight: 600;
 }
 
 ion-content p {
@@ -103,3 +183,133 @@ ion-content p {
 .txn-amount.expense {
   color: var(--ion-color-danger);
 }
+
+/* Cards polish */
+ion-card {
+  border-radius: var(--app-radius-md);
+  box-shadow: var(--app-shadow-1);
+  background: var(--ion-card-background);
+}
+
+ion-card:hover {
+  box-shadow: var(--app-shadow-2);
+  transition: box-shadow 160ms ease;
+}
+
+/* Toolbar compact spacing */
+ion-toolbar {
+  --min-height: 52px;
+  --background: var(--ion-toolbar-background);
+  --color: var(--ion-text-color);
+}
+
+/* Searchbar compact */
+ion-searchbar.search-compact {
+  --background: var(--app-color-surface);
+  --border-radius: var(--app-radius-sm);
+  --box-shadow: var(--app-shadow-1);
+}
+
+/* Chips */
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Progress bar (for credit usage) */
+.progress {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress > span {
+  display: block;
+  height: 100%;
+  background: var(--ion-color-warning);
+}
+
+/* Empty state */
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--app-color-text-subtle);
+}
+
+/* Lists improved contrast */
+ion-list {
+  background: transparent;
+}
+ion-list[inset] {
+  background: var(--app-color-surface);
+  border-radius: var(--app-radius-md);
+  box-shadow: var(--app-shadow-1);
+}
+ion-item {
+  --background: var(--ion-item-background);
+  --color: var(--ion-text-color);
+  --inner-padding-end: 12px;
+  --inner-padding-start: 12px;
+}
+
+/* Titles spacing */
+ion-card-header {
+  padding-bottom: 6px;
+}
+ion-card-title {
+  margin: 0;
+}
+
+/* Grid alignment tweaks */
+.summary-grid .ion-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Badges legibility */
+ion-badge[color="warning"] {
+  --background: #f59e0b;
+  --color: #1f2937;
+}
+ion-badge[color="danger"] {
+  --background: #dc2626;
+  --color: #ffffff;
+}
+ion-badge[color="success"] {
+  --background: #16a34a;
+  --color: #ffffff;
+}
+
+/* Chip outline contrast */
+ion-chip[outline] {
+  --color: var(--ion-text-color);
+  border-color: var(--ion-border-color);
+}
+
+/* Segment (filter pills) readability */
+ion-segment {
+  --background: var(--app-color-surface);
+  border-radius: var(--app-radius-sm);
+  box-shadow: var(--app-shadow-1);
+}
+ion-segment-button {
+  --color: var(--ion-color-medium);
+  --color-checked: var(--ion-text-color);
+}
+
+/* Visible focus rings for keyboard users */
+:where(button, a, ion-button, ion-segment-button, ion-tab-button, ion-chip, ion-item, ion-card):focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--ion-color-secondary) 70%, white);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* Headings rhythm */
+h1,h2,h3,h4 { color: var(--ion-text-color); line-height: 1.25; }

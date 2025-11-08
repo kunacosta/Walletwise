@@ -22,14 +22,12 @@ import {
   IonSearchbar,
 } from '@ionic/react';
 import { addOutline, settingsOutline } from 'ionicons/icons';
-import { useHistory } from 'react-router-dom';
 import { useIonAlert } from '@ionic/react';
 import { useAuthStore } from '../state/useAuthStore';
 import { useTxnStore } from '../state/useTxnStore';
 import type { Transaction } from '../types/transaction';
 import { DaySection } from '../components/DaySection';
 import { TxnModal } from '../components/TxnModal';
-import { TxnDetailsModal } from '../components/TxnDetailsModal';
 import { deleteTransaction } from '../services/db';
 import { ProBadge } from '../components/ProBadge';
 import {
@@ -47,7 +45,6 @@ interface ToastState {
 
 export const Ledger: React.FC = () => {
   const { user } = useAuthStore();
-  const history = useHistory();
   const items = useTxnStore((state) => state.items);
   const loading = useTxnStore((state) => state.loading);
   const error = useTxnStore((state) => state.error);
@@ -59,8 +56,6 @@ export const Ledger: React.FC = () => {
   const [currentMonth] = useState(() => new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | undefined>(undefined);
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [toast, setToast] = useState<ToastState | null>(null);
   const [presentAlert] = useIonAlert();
   const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
@@ -115,17 +110,11 @@ export const Ledger: React.FC = () => {
   const summary = useMemo(() => computeSummary(monthlyTransactions), [monthlyTransactions]);
 
   const handleAddClick = () => {
-    history.push('/transactions/new');
-  };
-
-  const handleView = (txn: Transaction) => {
-    setSelectedTransaction(txn);
-    setIsDetailsOpen(true);
+    setEditingTransaction(undefined);
+    setIsModalOpen(true);
   };
 
   const handleEdit = (txn: Transaction) => {
-    setSelectedTransaction(txn);
-    setIsDetailsOpen(false);
     setEditingTransaction(txn);
     setIsModalOpen(true);
   };
@@ -140,7 +129,6 @@ export const Ledger: React.FC = () => {
           text: 'Delete',
           role: 'destructive',
           handler: async () => {
-            setIsDetailsOpen(false);
             removeLocal(txn.id);
             try {
               await deleteTransaction(txn.id);
@@ -148,7 +136,8 @@ export const Ledger: React.FC = () => {
               setToast({ message: 'Transaction deleted', color: 'success' });
             } catch (err) {
               addLocal(txn);
-              const message = err instanceof Error ? err.message : 'Failed to delete transaction.';
+              const message =
+                err instanceof Error ? err.message : 'Failed to delete transaction.';
               setStoreError(message);
               setToast({ message, color: 'danger' });
             }
@@ -160,6 +149,7 @@ export const Ledger: React.FC = () => {
 
   const handleModalDismiss = () => {
     setIsModalOpen(false);
+    setEditingTransaction(undefined);
   };
 
   const handleModalSuccess = (message: string) => {
@@ -253,7 +243,8 @@ export const Ledger: React.FC = () => {
                 key={getDayKey(group.date)}
                 date={group.date}
                 items={group.items}
-                onView={handleView}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
               />
             ))}
           </IonList>
@@ -274,14 +265,6 @@ export const Ledger: React.FC = () => {
           onError={handleModalError}
         />
 
-        <TxnDetailsModal
-          isOpen={isDetailsOpen}
-          transaction={selectedTransaction ?? undefined}
-          onDismiss={() => setIsDetailsOpen(false)}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
-
         <IonToast
           isOpen={toast !== null}
           message={toast?.message}
@@ -294,3 +277,4 @@ export const Ledger: React.FC = () => {
     </IonPage>
   );
 };
+

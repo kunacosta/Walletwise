@@ -10,12 +10,15 @@ import {
   serverTimestamp,
   Timestamp,
   updateDoc,
+  writeBatch,
   type DocumentData,
   type QueryDocumentSnapshot,
   type Unsubscribe,
 } from 'firebase/firestore';
 import { auth, db } from './firebase';
 import type { Transaction, TransactionInput, TransactionPatch } from '../types/transaction';
+
+const randomId = (): string => Math.random().toString(36).slice(2) + Date.now().toString(36);
 
 const getCurrentUid = (): string => {
   const current = auth.currentUser;
@@ -41,6 +44,9 @@ const toFirestorePayload = (input: TransactionInput | TransactionPatch) => {
   }
   if (input.subcategory !== undefined) {
     payload.subcategory = input.subcategory;
+  }
+  if ('accountId' in input) {
+    payload.accountId = (input as any).accountId ?? null;
   }
   if ('note' in input) {
     payload.note = input.note ?? null;
@@ -74,6 +80,7 @@ const mapTransaction = (snapshot: QueryDocumentSnapshot<DocumentData>): Transact
     id: snapshot.id,
     type: data.type as Transaction['type'],
     amount: Number(data.amount ?? 0),
+    accountId: data.accountId ? String(data.accountId) : undefined,
     category: String(data.category ?? ''),
     subcategory: String(data.subcategory ?? ''),
     note: typeof data.note === 'string' && data.note.length > 0 ? data.note : undefined,
@@ -122,6 +129,47 @@ export const deleteTransaction = async (id: string): Promise<void> => {
   const uid = getCurrentUid();
   const docRef = doc(db, 'users', uid, 'transactions', id);
   await deleteDoc(docRef);
+};
+
+export const addTransfer = async (input: {
+  fromAccountId: string;
+  toAccountId: string;
+  amount: number;
+  date: Date;
+  note?: string;
+}): Promise<void> => {
+  if (!(input.amount > 0)) throw new Error('Amount must be greater than zero.');
+  if (input.fromAccountId === input.toAccountId) throw new Error('Pick two different accounts.');
+  const uid = getCurrentUid();
+  const ref = transactionsCollectionRef(uid);
+  const batch = writeBatch(db);
+  const linkId = randomId();
+  const base = {
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    date: Timestamp.fromDate(input.date),
+    note: input.note ?? null,
+    transferId: linkId,
+    category: 'Transfer',
+    subcategory: 'Internal',
+  } as Record<string, unknown>;
+  // Expense from source
+  const fromDoc = doc(ref);
+  batch.set(fromDoc, {
+    ...base,
+    type: 'expense',
+    amount: input.amount,
+    accountId: input.fromAccountId,
+  });
+  // Income to target
+  const toDoc = doc(ref);
+  batch.set(toDoc, {
+    ...base,
+    type: 'income',
+    amount: input.amount,
+    accountId: input.toAccountId,
+  });
+  await batch.commit();
 };
 
 export const subscribeTransactions = (
