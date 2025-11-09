@@ -22,10 +22,15 @@ const randomId = (): string => Math.random().toString(36).slice(2) + Date.now().
 
 const getCurrentUid = (): string => {
   const current = auth.currentUser;
-  if (!current?.uid) {
-    throw new Error('User session not found. Please sign in again.');
+  if (current?.uid) return current.uid;
+  // Offline fallback: use last known uid persisted by the auth listener
+  try {
+    const last = localStorage.getItem('walletwise:lastUid');
+    if (last) return last;
+  } catch {
+    // ignore storage errors
   }
-  return current.uid;
+  throw new Error('User session not found. Please sign in again.');
 };
 
 const transactionsCollectionRef = (uid: string) => collection(db, 'users', uid, 'transactions');

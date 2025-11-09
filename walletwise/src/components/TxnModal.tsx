@@ -19,13 +19,15 @@ import {
   IonTitle,
   IonToolbar,
   IonButtons,
+  useIonAlert,
 } from '@ionic/react';
 import type { Transaction, TransactionInput, TransactionType } from '../types/transaction';
-import { addTransaction, updateTransaction } from '../services/db';
+import { addTransaction, updateTransaction, deleteTransaction } from '../services/firebase';
 import { useTxnStore } from '../state/useTxnStore';
 import { useAuthStore } from '../state/useAuthStore';
 import { useCategories } from '../features/categories/useCategories';
 import type { Category } from '../types/category';
+import { formatCurrency } from '../utils/format';
 
 // Category options are sourced from Firestore via useCategories (seeded on first run)
 
@@ -75,6 +77,7 @@ export const TxnModal: React.FC<TxnModalProps> = ({
 }) => {
   const { user } = useAuthStore();
   const { items: allCategories } = useCategories(user?.uid);
+  const [presentAlert] = useIonAlert();
   const [form, setForm] = useState<FormState>(buildInitialState(transaction, initialDate));
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -235,6 +238,38 @@ export const TxnModal: React.FC<TxnModalProps> = ({
     }
   };
 
+  const handleDelete = async () => {
+    if (mode !== 'edit' || !transaction) return;
+    await presentAlert({
+      header: 'Delete Transaction',
+      message: `Delete ${transaction.category} for ${formatCurrency(transaction.amount)}?`,
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        {
+          text: 'Delete',
+          role: 'destructive',
+          handler: async () => {
+            setSubmitting(true);
+            removeLocal(transaction.id);
+            try {
+              await deleteTransaction(transaction.id);
+              setStoreError(null);
+              onSuccess('Transaction deleted');
+              onDismiss();
+            } catch (err) {
+              addLocal(transaction);
+              const message = err instanceof Error ? err.message : 'Failed to delete transaction.';
+              setStoreError(message);
+              onError(message);
+            } finally {
+              setSubmitting(false);
+            }
+          },
+        },
+      ],
+    });
+  };
+
   return (
     <IonModal isOpen={isOpen} onDidDismiss={onDismiss} breakpoints={[0, 0.45, 0.8]} initialBreakpoint={0.8}>
       <IonHeader>
@@ -243,6 +278,11 @@ export const TxnModal: React.FC<TxnModalProps> = ({
             <IonButton onClick={onDismiss} disabled={submitting}>
               Cancel
             </IonButton>
+            {mode === 'edit' ? (
+              <IonButton color="danger" fill="outline" onClick={handleDelete} disabled={submitting}>
+                Delete
+              </IonButton>
+            ) : null}
           </IonButtons>
           <IonTitle>{mode === 'create' ? 'Add Transaction' : 'Edit Transaction'}</IonTitle>
           <IonButtons slot="end">

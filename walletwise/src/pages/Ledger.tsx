@@ -23,14 +23,14 @@ import {
 } from '@ionic/react';
 import { addOutline, settingsOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
-import { useIonAlert } from '@ionic/react';
+// import { useIonAlert } from '@ionic/react';
 import { useAuthStore } from '../state/useAuthStore';
 import { useTxnStore } from '../state/useTxnStore';
 import type { Transaction } from '../types/transaction';
 import { DaySection } from '../components/DaySection';
 import { TxnModal } from '../components/TxnModal';
 import { TxnDetailsModal } from '../components/TxnDetailsModal';
-import { deleteTransaction } from '../services/db';
+// Delete/edit are now handled inside TxnDetailsModal
 import { ProBadge } from '../components/ProBadge';
 import {
   computeSummary,
@@ -53,8 +53,8 @@ export const Ledger: React.FC = () => {
   const error = useTxnStore((state) => state.error);
   const subscribe = useTxnStore((state) => state.subscribe);
   const setStoreError = useTxnStore((state) => state.setError);
-  const addLocal = useTxnStore((state) => state.addLocal);
-  const removeLocal = useTxnStore((state) => state.removeLocal);
+  // const addLocal = useTxnStore((state) => state.addLocal);
+  // const removeLocal = useTxnStore((state) => state.removeLocal);
 
   const [currentMonth] = useState(() => new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -62,7 +62,7 @@ export const Ledger: React.FC = () => {
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [toast, setToast] = useState<ToastState | null>(null);
-  const [presentAlert] = useIonAlert();
+  // const [presentAlert] = useIonAlert();
   const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [q, setQ] = useState('');
   console.log('Ledger renders', { hasUser: Boolean(user), txnCount: items.length, loading });
@@ -123,40 +123,7 @@ export const Ledger: React.FC = () => {
     setIsDetailsOpen(true);
   };
 
-  const handleEdit = (txn: Transaction) => {
-    setSelectedTransaction(txn);
-    setIsDetailsOpen(false);
-    setEditingTransaction(txn);
-    setIsModalOpen(true);
-  };
-
-  const handleDelete = (txn: Transaction) => {
-    presentAlert({
-      header: 'Delete Transaction',
-      message: `Delete ${txn.category} for ${formatCurrency(txn.amount)}?`,
-      buttons: [
-        { text: 'Cancel', role: 'cancel' },
-        {
-          text: 'Delete',
-          role: 'destructive',
-          handler: async () => {
-            setIsDetailsOpen(false);
-            removeLocal(txn.id);
-            try {
-              await deleteTransaction(txn.id);
-              setStoreError(null);
-              setToast({ message: 'Transaction deleted', color: 'success' });
-            } catch (err) {
-              addLocal(txn);
-              const message = err instanceof Error ? err.message : 'Failed to delete transaction.';
-              setStoreError(message);
-              setToast({ message, color: 'danger' });
-            }
-          },
-        },
-      ],
-    });
-  };
+  // Edit and Delete now handled inside TxnDetailsModal
 
   const handleModalDismiss = () => {
     setIsModalOpen(false);
@@ -278,8 +245,6 @@ export const Ledger: React.FC = () => {
           isOpen={isDetailsOpen}
           transaction={selectedTransaction ?? undefined}
           onDismiss={() => setIsDetailsOpen(false)}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
         />
 
         <IonToast

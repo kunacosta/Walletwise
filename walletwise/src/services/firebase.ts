@@ -1,9 +1,14 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import {
+  initializeAuth,
+  indexedDBLocalPersistence,
+  browserLocalPersistence,
+} from "firebase/auth";
 import {
   initializeFirestore,
   persistentLocalCache,
-  persistentMultipleTabManager
+  persistentMultipleTabManager,
+  memoryLocalCache,
 } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -16,12 +21,32 @@ const firebaseConfig = {
 };
 
 export const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+
+// Ensure Auth works reliably in Capacitor/WebView and offline
+// Prefer IndexedDB; fall back to localStorage if needed
+export const auth = initializeAuth(app, {
+  persistence: [indexedDBLocalPersistence, browserLocalPersistence],
+});
+
+// Firestore: enable offline persistence; fall back to in-memory if unavailable
+let selectedCache: any;
+try {
+  selectedCache = persistentLocalCache({
+    tabManager: persistentMultipleTabManager(),
+  });
+  console.log("Firestore cache: persistent IndexedDB (multi-tab)");
+} catch (err) {
+  console.warn("Persistent cache unavailable; using memory cache only", err);
+  selectedCache = memoryLocalCache();
+}
+
 export const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({
-    tabManager: persistentMultipleTabManager()
-  })
+  localCache: selectedCache,
 });
 
 // sanity check so you know envs are loaded
 console.log("Firebase project:", import.meta.env.VITE_FB_PROJECT_ID);
+
+// Convenience re-exports so feature code can import from a single module.
+// Note: core CRUD lives in `./db`. These are pass-through exports.
+export { addTransaction, updateTransaction, deleteTransaction, subscribeTransactions } from './db';

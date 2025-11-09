@@ -30,6 +30,15 @@ const detachAuthListener = onAuthStateChanged(
   auth,
   (currentUser: User | null) => {
     console.log('Auth state change', currentUser ? { uid: currentUser.uid } : { uid: null });
+    try {
+      if (currentUser?.uid) {
+        localStorage.setItem('walletwise:lastUid', currentUser.uid);
+      } else {
+        localStorage.removeItem('walletwise:lastUid');
+      }
+    } catch {
+      // ignore storage errors
+    }
     authStore.setAuthState(currentUser, false);
   },
   (error) => {
