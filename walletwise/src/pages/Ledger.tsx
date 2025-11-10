@@ -28,7 +28,6 @@ import { useAuthStore } from '../state/useAuthStore';
 import { useTxnStore } from '../state/useTxnStore';
 import type { Transaction } from '../types/transaction';
 import { DaySection } from '../components/DaySection';
-import { TxnModal } from '../components/TxnModal';
 import { TxnDetailsModal } from '../components/TxnDetailsModal';
 // Delete/edit are now handled inside TxnDetailsModal
 import { ProBadge } from '../components/ProBadge';
@@ -52,13 +51,10 @@ export const Ledger: React.FC = () => {
   const loading = useTxnStore((state) => state.loading);
   const error = useTxnStore((state) => state.error);
   const subscribe = useTxnStore((state) => state.subscribe);
-  const setStoreError = useTxnStore((state) => state.setError);
   // const addLocal = useTxnStore((state) => state.addLocal);
   // const removeLocal = useTxnStore((state) => state.removeLocal);
 
   const [currentMonth] = useState(() => new Date());
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | undefined>(undefined);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [toast, setToast] = useState<ToastState | null>(null);
@@ -124,19 +120,6 @@ export const Ledger: React.FC = () => {
   };
 
   // Edit and Delete now handled inside TxnDetailsModal
-
-  const handleModalDismiss = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleModalSuccess = (message: string) => {
-    setStoreError(null);
-    setToast({ message, color: 'success' });
-  };
-
-  const handleModalError = (message: string) => {
-    setToast({ message, color: 'danger' });
-  };
 
   const hasTransactions = groupedTransactions.length > 0;
 
@@ -231,15 +214,6 @@ export const Ledger: React.FC = () => {
             <IonIcon icon={addOutline} />
           </IonFabButton>
         </IonFab>
-
-        <TxnModal
-          isOpen={isModalOpen}
-          mode={editingTransaction ? 'edit' : 'create'}
-          transaction={editingTransaction}
-          onDismiss={handleModalDismiss}
-          onSuccess={handleModalSuccess}
-          onError={handleModalError}
-        />
 
         <TxnDetailsModal
           isOpen={isDetailsOpen}

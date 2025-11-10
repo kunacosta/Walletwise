@@ -35,7 +35,6 @@ export const TxnDetailsModal: React.FC<TxnDetailsModalProps> = ({ isOpen, transa
   const [toast, setToast] = useState<{ message: string; color: 'success' | 'danger' | 'medium' } | null>(null);
 
   const setStoreError = useTxnStore((s) => s.setError);
-  const handleDelete = undefined; // deletion moved into edit modal
 
   const handleEdit = () => {
     if (!transaction) return;

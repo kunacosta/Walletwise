@@ -196,6 +196,143 @@ ion-card:hover {
   transition: box-shadow 160ms ease;
 }
 
+.add-txn-content::part(scroll) {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding-bottom: 1.5rem;
+}
+
+.add-txn-empty-state {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+}
+
+.add-txn-card {
+  background: var(--app-color-surface);
+  border-radius: var(--app-radius-md);
+  box-shadow: var(--app-shadow-1);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.add-txn-amount {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.add-txn-amount-label {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.add-txn-amount-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--ion-text-color);
+}
+
+.add-txn-amount-neutral {
+  color: var(--ion-text-color);
+}
+
+.add-txn-amount-income {
+  color: var(--ion-color-success);
+}
+
+.add-txn-amount-expense {
+  color: var(--ion-color-danger);
+}
+
+.add-txn-amount-mode {
+  margin-top: 0.25rem;
+}
+
+ion-list.add-txn-form {
+  margin: 0;
+  padding: 0.5rem 0;
+}
+
+ion-list.add-txn-form ion-item {
+  --background: transparent;
+}
+
+ion-list.add-txn-form ion-item + ion-item {
+  margin-top: 0.5rem;
+}
+
+.add-txn-date-chip {
+  display: inline-flex;
+}
+
+.add-txn-date-chip ion-datetime-button::part(native) {
+  border-radius: var(--app-radius-sm);
+  background: var(--app-color-surface-alt);
+  border: 1px solid var(--ion-border-color);
+  padding: 0.5rem 0.75rem;
+  font-weight: 600;
+  color: var(--ion-text-color);
+}
+
+.add-txn-mode-toggle {
+  margin-top: 0.5rem;
+}
+
+.add-txn-keypad {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: var(--app-color-surface);
+  border-radius: var(--app-radius-md);
+  box-shadow: var(--app-shadow-1);
+  padding: 1rem;
+}
+
+.add-txn-key-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.add-txn-key {
+  border: none;
+  border-radius: var(--app-radius-sm);
+  background: var(--app-color-surface-alt);
+  color: var(--ion-text-color);
+  font-size: 1.5rem;
+  font-weight: 600;
+  padding: 0.85rem 0.5rem;
+  box-shadow: inset 0 -2px 0 rgba(15, 23, 42, 0.08);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.add-txn-key:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 1px 0 rgba(15, 23, 42, 0.12);
+}
+
+.add-txn-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+@media (min-width: 520px) {
+  .add-txn-actions {
+    flex-direction: row;
+  }
+}
+
+.add-txn-hint {
+  margin-top: 0.25rem;
+  text-align: center;
+}
+
 /* Toolbar compact spacing */
 ion-toolbar {
   --min-height: 52px;
