@@ -1,6 +1,6 @@
 import React from 'react';
 import { IonIcon, IonItem, IonLabel, IonNote } from '@ionic/react';
-import { arrowUpCircleOutline, arrowDownCircleOutline } from 'ionicons/icons';
+import { arrowUpCircleOutline, arrowDownCircleOutline, cloudUploadOutline } from 'ionicons/icons';
 import type { Transaction } from '../types/transaction';
 import { formatSignedAmount, formatTime } from '../utils/format';
 
@@ -32,9 +32,20 @@ export const TxnItem: React.FC<TxnItemProps> = ({ transaction, onView }) => {
         <p className="txn-meta">{formatTime(transaction.date)}</p>
         {transaction.note ? <p className="txn-note">{transaction.note}</p> : null}
       </IonLabel>
-      <IonNote slot="end" className={amountClass}>
-        {formatSignedAmount(transaction.type, transaction.amount)}
-      </IonNote>
+      <div slot="end" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        {transaction.pending ? (
+          <IonIcon
+            icon={cloudUploadOutline}
+            color="warning"
+            aria-label="Pending sync"
+            title="Pending sync"
+            style={{ fontSize: 18 }}
+          />
+        ) : null}
+        <IonNote className={amountClass}>
+          {formatSignedAmount(transaction.type, transaction.amount)}
+        </IonNote>
+      </div>
     </IonItem>
   );
 };

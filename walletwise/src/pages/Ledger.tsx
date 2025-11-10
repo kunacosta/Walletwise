@@ -1,9 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
   IonContent,
   IonText,
   IonList,
@@ -15,7 +12,6 @@ import {
   IonGrid,
   IonRow,
   IonCol,
-  IonButtons,
   IonButton,
   IonSegment,
   IonSegmentButton,
@@ -32,6 +28,7 @@ import { TxnModal } from '../components/TxnModal';
 import { TxnDetailsModal } from '../components/TxnDetailsModal';
 // Delete/edit are now handled inside TxnDetailsModal
 import { ProBadge } from '../components/ProBadge';
+import { PageHeader } from '../components/PageHeader';
 import {
   computeSummary,
   formatCurrency,
@@ -142,17 +139,15 @@ export const Ledger: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot="start"><ProBadge /></IonButtons>
-          <IonTitle>{formatMonthYear(currentMonth)} Ledger</IonTitle>
-          <IonButtons slot="end">
-            <IonButton routerLink="/settings">
-              <IonIcon slot="icon-only" icon={settingsOutline} />
-            </IonButton>
-          </IonButtons>
-        </IonToolbar>
-      </IonHeader>
+      <PageHeader
+        title={`${formatMonthYear(currentMonth)} Ledger`}
+        start={<ProBadge />}
+        end={(
+          <IonButton routerLink="/settings">
+            <IonIcon slot="icon-only" icon={settingsOutline} />
+          </IonButton>
+        )}
+      />
       <IonContent fullscreen className="ion-padding">
         <div className="ion-margin-bottom">
           <IonSegment value={filter} onIonChange={(e) => setFilter((e.detail.value as any) ?? 'all')}>

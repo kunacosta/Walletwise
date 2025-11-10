@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import {
   IonPage,
+  IonContent,
   IonHeader,
   IonToolbar,
   IonTitle,
-  IonContent,
   IonGrid,
   IonRow,
   IonCol,
@@ -32,6 +32,7 @@ import type { Account, AccountType } from '../types/account';
 import { formatCurrency, formatDateTime } from '../utils/format';
 import { useSettings } from '../state/settings';
 import { ProBadge } from '../components/ProBadge';
+import { PageHeader } from '../components/PageHeader';
 
 type Mode = 'create' | 'edit';
 
@@ -137,17 +138,13 @@ export const Accounts: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot="start"><ProBadge /></IonButtons>
-          <IonTitle>Accounts</IonTitle>
-          <IonButtons slot="end">
-            <IonButton onClick={openCreate} disabled={!canCreate} title={createDisabledReason ?? undefined}>
-              <IonIcon slot="icon-only" icon={addOutline} />
-            </IonButton>
-          </IonButtons>
-        </IonToolbar>
-      </IonHeader>
+      <PageHeader
+        title="Accounts"
+        start={<ProBadge />}
+        end={(<IonButton onClick={openCreate} disabled={!canCreate} title={createDisabledReason ?? undefined}>
+          <IonIcon slot="icon-only" icon={addOutline} />
+        </IonButton>)}
+      />
       <IonContent className="ion-padding">
         {!canCreate ? (
           <IonText color="medium">

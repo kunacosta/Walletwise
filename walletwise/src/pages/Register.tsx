@@ -1,9 +1,6 @@
 import React, { useEffect, useState, type FormEvent } from 'react';
 import {
   IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
   IonContent,
   IonList,
   IonItem,
@@ -13,6 +10,7 @@ import {
   type InputCustomEvent,
   type InputChangeEventDetail,
 } from '@ionic/react';
+import { PageHeader } from '../components/PageHeader';
 import { useHistory } from 'react-router-dom';
 import { register as registerUser } from '../services/auth';
 import { useAuthStore } from '../state/useAuthStore';
@@ -70,14 +68,10 @@ export const Register: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Create Account</IonTitle>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent className="ion-padding">
+      <PageHeader title="Create Account" />
+      <IonContent className="ion-padding centered-page">
         <form onSubmit={handleSubmit}>
-          <IonList inset>
+          <IonList inset className="container-narrow">
             <IonItem>
               <IonInput
                 label="Email"
@@ -120,13 +114,13 @@ export const Register: React.FC = () => {
           <IonButton
             type="submit"
             expand="block"
-            className="ion-margin-top"
+            className="ion-margin-top container-narrow"
             disabled={submitting}
           >
             {submitting ? 'Creating Account...' : 'Create Account'}
           </IonButton>
         </form>
-        <IonButton routerLink="/login" fill="clear" expand="block" className="ion-margin-top">
+        <IonButton routerLink="/login" fill="clear" expand="block" className="ion-margin-top container-narrow">
           Back to login
         </IonButton>
       </IonContent>

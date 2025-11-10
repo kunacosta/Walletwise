@@ -1,9 +1,6 @@
 import React from 'react';
 import {
   IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
   IonContent,
   IonGrid,
   IonRow,
@@ -14,7 +11,6 @@ import {
   IonCardContent,
   IonBadge,
   IonText,
-  IonButtons,
   IonButton,
 } from '@ionic/react';
 import { useAuthStore } from '../state/useAuthStore';
@@ -22,6 +18,7 @@ import { useAccounts } from '../features/accounts/useAccounts';
 import { useBills } from '../features/bills/useBills';
 import { computeSpendableForAccount } from '../features/spendable/spendable';
 import { ProBadge } from '../components/ProBadge';
+import { PageHeader } from '../components/PageHeader';
 import { computeRecommendations, getRecsDismissed, setRecsDismissed } from '../features/recs/recommendations';
 import { useTxnStore } from '../state/useTxnStore';
 import { StatTile } from '../components/ui/StatTile';
@@ -87,12 +84,7 @@ export const Dashboard: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot="start"><ProBadge /></IonButtons>
-          <IonTitle>Dashboard</IonTitle>
-        </IonToolbar>
-      </IonHeader>
+      <PageHeader title="Dashboard" start={<ProBadge />} />
       <IonContent className="ion-padding">
         {hasRecs && !recsDismissed ? (
           <IonCard>
@@ -242,4 +234,3 @@ export const Dashboard: React.FC = () => {
     </IonPage>
   );
 };
-

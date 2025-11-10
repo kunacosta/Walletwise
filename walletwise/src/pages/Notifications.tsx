@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import {
   IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
   IonContent,
   IonList,
   IonItem,
   IonLabel,
   IonButton,
 } from '@ionic/react';
+import { PageHeader } from '../components/PageHeader';
 import { LocalNotifications, type PendingLocalNotificationSchema } from '@capacitor/local-notifications';
 
 export const Notifications: React.FC = () => {
@@ -33,11 +31,7 @@ export const Notifications: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Notifications Center</IonTitle>
-        </IonToolbar>
-      </IonHeader>
+      <PageHeader title="Notifications Center" />
       <IonContent className="ion-padding">
         <IonButton onClick={refresh}>Refresh</IonButton>
         <IonButton onClick={clearAll} color="danger" fill="outline" className="ion-margin-start">Clear All</IonButton>
@@ -62,4 +56,3 @@ export const Notifications: React.FC = () => {
     </IonPage>
   );
 };
-

@@ -1,11 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   IonPage,
-  IonHeader,
-  IonToolbar,
   IonButtons,
   IonButton,
-  IonTitle,
   IonContent,
   IonSegment,
   IonSegmentButton,
@@ -29,6 +26,7 @@ import { addTransfer } from '../services/db';
 import { Money } from '../components/ui/Money';
 import { useHistory } from 'react-router-dom';
 import { useLocation } from 'react-router';
+import { PageHeader } from '../components/PageHeader';
 
 const KeyButton: React.FC<{ label: string; onClick: () => void; grow?: boolean }> = ({ label, onClick, grow }) => (
   <button
@@ -145,17 +143,11 @@ export const AddTransaction: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot="start">
-            <IonButton onClick={() => history.goBack()}>Cancel</IonButton>
-          </IonButtons>
-          <IonTitle>Add Transaction</IonTitle>
-          <IonButtons slot="end">
-            <IonButton onClick={handleSave} disabled={disabled}>Save</IonButton>
-          </IonButtons>
-        </IonToolbar>
-      </IonHeader>
+      <PageHeader
+        title="Add Transaction"
+        start={<IonButton onClick={() => history.goBack()}>Cancel</IonButton>}
+        end={<IonButton onClick={handleSave} disabled={disabled}>Save</IonButton>}
+      />
       <IonContent className="ion-padding">
         <IonSegment value={mode} onIonChange={(e) => setMode(((e.detail.value as string) as Mode) ?? 'expense')}>
           <IonSegmentButton value="income">INCOME</IonSegmentButton>

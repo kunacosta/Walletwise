@@ -1,16 +1,13 @@
 import React from 'react';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonText } from '@ionic/react';
+import { IonPage, IonContent, IonList, IonItem, IonLabel, IonText } from '@ionic/react';
 import { useAuthStore } from '../state/useAuthStore';
+import { PageHeader } from '../components/PageHeader';
 
 export const Profile: React.FC = () => {
   const { user } = useAuthStore();
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Profile</IonTitle>
-        </IonToolbar>
-      </IonHeader>
+      <PageHeader title="Profile" />
       <IonContent className="ion-padding">
         {user ? (
           <IonList inset>
@@ -30,4 +27,3 @@ export const Profile: React.FC = () => {
     </IonPage>
   );
 };
-

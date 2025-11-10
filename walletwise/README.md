@@ -24,6 +24,26 @@ VITE_FB_MESSAGING_SENDER_ID=1234567890
 1. Install dependencies with `npm install`.
 2. Run the app with `ionic serve` (or `npm run dev` for the Vite development server).
 
+### Sync status
+- A small chip at the bottom shows sync state:
+  - All changes saved: online and server-acknowledged
+  - Saving…: pending writes not yet acknowledged
+  - Offline — changes will sync: no connection; data queues in IndexedDB
+
+### Troubleshooting connectivity
+- If your network blocks Firestore streaming, set `VITE_FB_FORCE_LONG_POLLING=true` in `.env` and reload.
+- Ad blockers/VPNs can block `firestore.googleapis.com`; allowlist and retry.
+
+### Optional: Firestore Emulator
+- For local-only testing, enable the emulator by adding to `.env`:
+
+```env
+VITE_USE_FIRESTORE_EMULATOR=true
+VITE_FIRESTORE_EMULATOR_HOST=127.0.0.1
+VITE_FIRESTORE_EMULATOR_PORT=8080
+```
+- Start the emulator (e.g., `firebase emulators:start --only firestore`) and then run `ionic serve`.
+
 ## Android Build
 
 1. Execute `ionic build` to produce the web assets.

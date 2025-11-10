@@ -1,9 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import {
   IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
   IonContent,
   IonText,
   IonButtons,
@@ -26,6 +23,7 @@ import { sumsForMonth, groupExpensesByCategory, groupExpensesBySubcategory, dail
 import { formatCurrency, formatMonthYear, isSameMonth } from '../utils/format';
 import { useSettings } from '../state/settings';
 import { ProBadge } from '../components/ProBadge';
+import { PageHeader } from '../components/PageHeader';
 
 const colors = [
   '#2dd36f', '#eb445a', '#ffc409', '#3dc2ff', '#7044ff', '#ff6b6b', '#00d4d8', '#b966ff', '#fca5a5', '#94a3b8',
@@ -91,19 +89,15 @@ export const Analytics: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot="start">
-            <IonButton onClick={prevMonth} aria-label="Previous month"><IonIcon slot="icon-only" icon={chevronBackOutline} /></IonButton>
-          </IonButtons>
-          <IonTitle>{formatMonthYear(month)} Analytics</IonTitle>
-          <IonButtons slot="end">
-            <ProBadge />
-            <IonButton onClick={exportCsv} aria-label="Export CSV"><IonIcon slot="icon-only" icon={downloadOutline} /></IonButton>
-            <IonButton onClick={nextMonth} aria-label="Next month"><IonIcon slot="icon-only" icon={chevronForwardOutline} /></IonButton>
-          </IonButtons>
-        </IonToolbar>
-      </IonHeader>
+      <PageHeader
+        title={`${formatMonthYear(month)} Analytics`}
+        start={<IonButton onClick={prevMonth} aria-label="Previous month"><IonIcon slot="icon-only" icon={chevronBackOutline} /></IonButton>}
+        end={<>
+          <ProBadge />
+          <IonButton onClick={exportCsv} aria-label="Export CSV"><IonIcon slot="icon-only" icon={downloadOutline} /></IonButton>
+          <IonButton onClick={nextMonth} aria-label="Next month"><IonIcon slot="icon-only" icon={chevronForwardOutline} /></IonButton>
+        </>}
+      />
       <IonContent className="ion-padding">
         <IonCard>
           <IonCardHeader>

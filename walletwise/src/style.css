@@ -313,3 +313,8 @@ ion-segment-button {
 
 /* Headings rhythm */
 h1,h2,h3,h4 { color: var(--ion-text-color); line-height: 1.25; }
+
+/* Layout helpers */
+.container-narrow { max-width: 480px; margin-left: auto; margin-right: auto; }
+.centered-page { display: flex; align-items: center; }
+.centered-page form { width: 100%; }

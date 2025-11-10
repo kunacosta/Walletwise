@@ -23,6 +23,7 @@ import { Notifications } from '../pages/Notifications';
 import { Profile } from '../pages/Profile';
 import { AddTransaction } from '../pages/AddTransaction';
 import { useAuthStore } from '../state/useAuthStore';
+import { SyncIndicator } from '../components/SyncIndicator';
 import {
   homeOutline,
   listOutline,
@@ -133,6 +134,7 @@ export const AppRouter: React.FC = () => {
           </IonRouterOutlet>
         )}
       </IonReactRouter>
+      <SyncIndicator />
     </IonApp>
   );
 };

@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
   IonContent,
   IonButton,
   IonText,
@@ -25,6 +22,7 @@ import { useTxnStore } from '../state/useTxnStore';
 import { useAuthStore } from '../state/useAuthStore';
 import { getFirestore, collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { ensurePermission } from '../features/notifications/scheduler';
+import { PageHeader } from '../components/PageHeader';
 
 export const Settings: React.FC = () => {
   const history = useHistory();
@@ -81,12 +79,7 @@ export const Settings: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Settings</IonTitle>
-          <IonButtons slot="start"><ProBadge /></IonButtons>
-        </IonToolbar>
-      </IonHeader>
+      <PageHeader title="Settings" start={<ProBadge />} />
       <IonContent className="ion-padding">
         {user?.email ? (
           <IonText>

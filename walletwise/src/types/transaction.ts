@@ -11,6 +11,8 @@ export interface Transaction {
   date: Date;
   createdAt?: Date | null;
   updatedAt?: Date | null;
+  // client-only: true when write not yet acknowledged by server
+  pending?: boolean;
 }
 
 export interface TransactionInput {

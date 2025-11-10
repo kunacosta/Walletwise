@@ -16,6 +16,7 @@ import {
   type Unsubscribe,
 } from 'firebase/firestore';
 import { auth, db } from './firebase';
+import { useSyncStatus } from '../state/useSyncStatus';
 import type { Transaction, TransactionInput, TransactionPatch } from '../types/transaction';
 
 const randomId = (): string => Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -92,6 +93,7 @@ const mapTransaction = (snapshot: QueryDocumentSnapshot<DocumentData>): Transact
     date: dateValue instanceof Timestamp ? dateValue.toDate() : (dateValue as Date),
     createdAt: convertTimestamp(data.createdAt),
     updatedAt: convertTimestamp(data.updatedAt),
+    pending: snapshot.metadata.hasPendingWrites === true,
   };
 };
 
@@ -108,7 +110,18 @@ export const addTransaction = async (input: TransactionInput): Promise<string> =
     updatedAt: serverTimestamp(),
   };
 
+  // mark pending before local write so UI can reflect immediately
+  try {
+    useSyncStatus.getState().setPendingWrites(true);
+  } catch {}
   const docRef = await addDoc(ref, payload);
+  // resolve when this write reaches the server
+  try {
+    const { waitForPendingWrites } = await import('firebase/firestore');
+    void waitForPendingWrites(db).then(() => {
+      try { useSyncStatus.getState().markSyncedNow(); } catch {}
+    });
+  } catch {}
   return docRef.id;
 };
 
@@ -127,13 +140,27 @@ export const updateTransaction = async (
     updatedAt: serverTimestamp(),
   };
 
+  try { useSyncStatus.getState().setPendingWrites(true); } catch {}
   await updateDoc(docRef, payload);
+  try {
+    const { waitForPendingWrites } = await import('firebase/firestore');
+    void waitForPendingWrites(db).then(() => {
+      try { useSyncStatus.getState().markSyncedNow(); } catch {}
+    });
+  } catch {}
 };
 
 export const deleteTransaction = async (id: string): Promise<void> => {
   const uid = getCurrentUid();
   const docRef = doc(db, 'users', uid, 'transactions', id);
+  try { useSyncStatus.getState().setPendingWrites(true); } catch {}
   await deleteDoc(docRef);
+  try {
+    const { waitForPendingWrites } = await import('firebase/firestore');
+    void waitForPendingWrites(db).then(() => {
+      try { useSyncStatus.getState().markSyncedNow(); } catch {}
+    });
+  } catch {}
 };
 
 export const addTransfer = async (input: {
@@ -174,7 +201,14 @@ export const addTransfer = async (input: {
     amount: input.amount,
     accountId: input.toAccountId,
   });
+  try { useSyncStatus.getState().setPendingWrites(true); } catch {}
   await batch.commit();
+  try {
+    const { waitForPendingWrites } = await import('firebase/firestore');
+    void waitForPendingWrites(db).then(() => {
+      try { useSyncStatus.getState().markSyncedNow(); } catch {}
+    });
+  } catch {}
 };
 
 export const subscribeTransactions = (
@@ -190,12 +224,15 @@ export const subscribeTransactions = (
 
   return onSnapshot(
     q,
+    { includeMetadataChanges: true },
     (snapshot) => {
+      try { useSyncStatus.getState().updateFromSnapshot(snapshot as any); } catch {}
       const transactions = snapshot.docs.map(mapTransaction);
       onData(transactions);
     },
     (error) => {
       console.error('Failed to subscribe to transactions', error);
+      try { useSyncStatus.getState().setError(error.message || 'Sync error'); } catch {}
       onError?.(error);
     },
   );

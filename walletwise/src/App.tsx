@@ -7,6 +7,7 @@ import { useAccounts } from './features/accounts/useAccounts';
 import { useBills } from './features/bills/useBills';
 import { useSettings } from './state/settings';
 import { ensurePermission, rescheduleAll } from './features/notifications/scheduler';
+import { useSyncStatus } from './state/useSyncStatus';
 
 setupIonicReact();
 
@@ -19,6 +20,7 @@ const App: React.FC = () => {
   const notificationsEnabled = useSettings((s) => s.notificationsEnabled);
   const theme = useSettings((s) => s.theme);
   React.useEffect(() => { void useSettings.getState().hydrate(); }, []);
+  React.useEffect(() => { try { useSyncStatus.getState().init(); } catch {} }, []);
 
   React.useEffect(() => {
     const apply = () => {
