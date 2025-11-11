@@ -8,6 +8,8 @@ import {
   IonFab,
   IonFabButton,
   IonIcon,
+  IonRefresher,
+  IonRefresherContent,
   IonToast,
   IonGrid,
   IonRow,
@@ -17,14 +19,13 @@ import {
   IonSegmentButton,
   IonSearchbar,
 } from '@ionic/react';
-import { addOutline, settingsOutline } from 'ionicons/icons';
+import { addOutline, chevronBackOutline, chevronForwardOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
 // import { useIonAlert } from '@ionic/react';
 import { useAuthStore } from '../state/useAuthStore';
 import { useTxnStore } from '../state/useTxnStore';
 import type { Transaction } from '../types/transaction';
 import { DaySection } from '../components/DaySection';
-import { TxnModal } from '../components/TxnModal';
 import { TxnDetailsModal } from '../components/TxnDetailsModal';
 // Delete/edit are now handled inside TxnDetailsModal
 import { ProBadge } from '../components/ProBadge';
@@ -49,13 +50,11 @@ export const Ledger: React.FC = () => {
   const loading = useTxnStore((state) => state.loading);
   const error = useTxnStore((state) => state.error);
   const subscribe = useTxnStore((state) => state.subscribe);
-  const setStoreError = useTxnStore((state) => state.setError);
   // const addLocal = useTxnStore((state) => state.addLocal);
   // const removeLocal = useTxnStore((state) => state.removeLocal);
 
-  const [currentMonth] = useState(() => new Date());
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | undefined>(undefined);
+  const [currentMonth, setCurrentMonth] = useState(() => new Date());
+
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [toast, setToast] = useState<ToastState | null>(null);
@@ -111,6 +110,13 @@ export const Ledger: React.FC = () => {
 
   const summary = useMemo(() => computeSummary(monthlyTransactions), [monthlyTransactions]);
 
+  const prevMonth = () => {
+    setCurrentMonth((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
+  };
+  const nextMonth = () => {
+    setCurrentMonth((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
+  };
+
   const handleAddClick = () => {
     history.push('/transactions/new');
   };
@@ -122,19 +128,6 @@ export const Ledger: React.FC = () => {
 
   // Edit and Delete now handled inside TxnDetailsModal
 
-  const handleModalDismiss = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleModalSuccess = (message: string) => {
-    setStoreError(null);
-    setToast({ message, color: 'success' });
-  };
-
-  const handleModalError = (message: string) => {
-    setToast({ message, color: 'danger' });
-  };
-
   const hasTransactions = groupedTransactions.length > 0;
 
   return (
@@ -143,12 +136,34 @@ export const Ledger: React.FC = () => {
         title={`${formatMonthYear(currentMonth)} Ledger`}
         start={<ProBadge />}
         end={(
-          <IonButton routerLink="/settings">
-            <IonIcon slot="icon-only" icon={settingsOutline} />
-          </IonButton>
+          <>
+            <IonButton onClick={prevMonth} aria-label="Previous month">
+              <IonIcon slot="icon-only" icon={chevronBackOutline} />
+            </IonButton>
+            <IonButton onClick={nextMonth} aria-label="Next month">
+              <IonIcon slot="icon-only" icon={chevronForwardOutline} />
+            </IonButton>
+          </>
         )}
       />
       <IonContent fullscreen className="ion-padding">
+        {/* Pull to refresh to re-subscribe */}
+        <IonRefresher
+          slot="fixed"
+          onIonRefresh={(e) => {
+            if (user?.uid) {
+              const unsub = subscribe(user.uid);
+              setTimeout(() => {
+                unsub?.();
+                (e as any).detail.complete();
+              }, 600);
+            } else {
+              setTimeout(() => (e as any).detail.complete(), 300);
+            }
+          }}
+        >
+          <IonRefresherContent />
+        </IonRefresher>
         <div className="ion-margin-bottom">
           <IonSegment value={filter} onIonChange={(e) => setFilter((e.detail.value as any) ?? 'all')}>
             <IonSegmentButton value="all">All</IonSegmentButton>
@@ -159,6 +174,8 @@ export const Ledger: React.FC = () => {
             className="search-compact"
             value={q}
             onIonInput={(e) => setQ(e.detail.value ?? '')}
+            debounce={250}
+            animated
             placeholder="Search category, subcategory, note"
             aria-label="Search transactions"
           />
@@ -221,20 +238,12 @@ export const Ledger: React.FC = () => {
           </IonList>
         ) : null}
 
-        <IonFab vertical="bottom" horizontal="end" slot="fixed">
-          <IonFabButton color="primary" onClick={handleAddClick}>
+        <IonFab vertical="bottom" horizontal="end" slot="fixed" style={{ bottom: 'calc(var(--ion-safe-area-bottom, 0px) + 76px)' } as React.CSSProperties}>
+          <IonFabButton color="primary" onClick={handleAddClick} aria-label="Add transaction">
             <IonIcon icon={addOutline} />
           </IonFabButton>
         </IonFab>
 
-        <TxnModal
-          isOpen={isModalOpen}
-          mode={editingTransaction ? 'edit' : 'create'}
-          transaction={editingTransaction}
-          onDismiss={handleModalDismiss}
-          onSuccess={handleModalSuccess}
-          onError={handleModalError}
-        />
 
         <TxnDetailsModal
           isOpen={isDetailsOpen}

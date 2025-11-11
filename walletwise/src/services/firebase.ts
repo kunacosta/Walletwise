@@ -45,9 +45,7 @@ try {
 const extraFsOptions: Record<string, unknown> = {};
 try {
   if (import.meta.env.VITE_FB_FORCE_LONG_POLLING === 'true') {
-    // @ts-expect-error: experimental flags are not always in types
     extraFsOptions.experimentalForceLongPolling = true;
-    // @ts-expect-error: experimental flags are not always in types
     extraFsOptions.useFetchStreams = false;
     console.warn('Firestore: experimentalForceLongPolling enabled');
   }

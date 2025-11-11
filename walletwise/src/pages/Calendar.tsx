@@ -31,6 +31,8 @@ import { useSettings } from '../state/settings';
 import { formatCurrency, formatDayLabel, formatMonthYear } from '../utils/format';
 // Add Transaction now uses a full page
 import { ProBadge } from '../components/ProBadge';
+import { Money } from '../components/ui/Money';
+import styles from './Calendar.module.css';
 import { useHistory } from 'react-router-dom';
 
 interface DayInfo {
@@ -137,42 +139,66 @@ export const Calendar: React.FC = () => {
     });
   }, [bills, selectedDay]);
 
+  const weekdayLabels = useMemo(() => {
+    const labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    if (firstDayOfWeek === 1) {
+      return [...labels.slice(1), labels[0]];
+    }
+    return labels;
+  }, [firstDayOfWeek]);
+
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar>
           <IonButtons slot="start">
-            <IonButton onClick={prevMonth}><IonIcon slot="icon-only" icon={chevronBackOutline} /></IonButton>
+            <IonButton onClick={prevMonth} aria-label="Previous month"><IonIcon slot="icon-only" icon={chevronBackOutline} /></IonButton>
           </IonButtons>
-          <IonTitle>{formatMonthYear(currentMonth)} — Income {formatCurrency(summary.income)} · Expense {formatCurrency(summary.expense)} · Net {formatCurrency(summary.net)}</IonTitle>
+          <IonTitle>{formatMonthYear(currentMonth)}</IonTitle>
           <IonButtons slot="end">
             <ProBadge />
-            <IonButton onClick={nextMonth}><IonIcon slot="icon-only" icon={chevronForwardOutline} /></IonButton>
+            <IonButton onClick={nextMonth} aria-label="Next month"><IonIcon slot="icon-only" icon={chevronForwardOutline} /></IonButton>
           </IonButtons>
+        </IonToolbar>
+        <IonToolbar className={styles.summaryToolbar}>
+          <IonTitle size="small">
+            <div className={styles.summaryRow}>
+              <span>Income <Money value={summary.income} type="income" /></span>
+              <span>Expense <Money value={summary.expense} type="expense" /></span>
+              <span>Net <Money value={Math.abs(summary.net)} signed type={summary.net >= 0 ? 'income' : 'expense'} /></span>
+            </div>
+          </IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent className="ion-padding">
         <IonGrid>
           <IonRow>
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
-              <IonCol key={d} className="ion-text-center" size="" style={{ fontWeight: 600 }}>{d}</IonCol>
+            {weekdayLabels.map((d) => (
+              <IonCol key={d} className={`${styles.weekday} ion-text-center`}>
+                {d}
+              </IonCol>
             ))}
           </IonRow>
           {Array.from({ length: grid.length / 7 }, (_, r) => r).map((row) => (
             <IonRow key={row}>
               {grid.slice(row * 7, row * 7 + 7).map((cell) => (
                 <IonCol key={cell.date.toISOString()}>
-                  <IonCard button onClick={() => openDay(cell.date)} color={cell.inMonth ? undefined : 'light'}>
-                    <IonCardContent>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <strong>{cell.date.getDate()}</strong>
+                  <IonCard
+                    className={styles.dayCard}
+                    button
+                    onClick={() => openDay(cell.date)}
+                    color={cell.inMonth ? undefined : 'light'}
+                  >
+                    <IonCardContent className={styles.dayCardContent}>
+                      <div className={styles.dayHeader}>
+                        <span className={styles.dayNumber}>{cell.date.getDate()}</span>
                         {cell.billsDue > 0 ? (
                           <IonBadge color="warning">Bills {formatCurrency(cell.billsDue)}</IonBadge>
                         ) : null}
                       </div>
-                      <div style={{ marginTop: 8 }}>
+                      <div className={styles.netWrapper}>
                         <IonBadge color={cell.net >= 0 ? 'success' : 'danger'}>
-                          {cell.net >= 0 ? '+' : ''}{formatCurrency(cell.net >= 0 ? cell.net : -cell.net)}
+                          <Money value={Math.abs(cell.net)} signed type={cell.net >= 0 ? 'income' : 'expense'} />
                         </IonBadge>
                       </div>
                     </IonCardContent>
@@ -210,7 +236,7 @@ export const Calendar: React.FC = () => {
                       <p>{t.type}</p>
                     </IonLabel>
                     <IonBadge slot="end" color={t.type === 'income' ? 'success' : 'danger'}>
-                      {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount)}
+                      <Money value={Math.abs(t.amount)} signed type={t.type === 'income' ? 'income' : 'expense'} />
                     </IonBadge>
                   </IonItem>
                 ))

@@ -1,0 +1,46 @@
+.summaryToolbar {
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --min-height: 44px;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.summaryRow span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.weekday {
+  font-weight: 600;
+}
+
+.netWrapper {
+  margin-top: 8px;
+}
+
+/* Day card sizing and layout for consistent grid */
+.dayCard {
+  min-height: 92px;
+}
+.dayCardContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dayHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.dayNumber {
+  font-weight: 700;
+}

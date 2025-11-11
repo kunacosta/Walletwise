@@ -12,12 +12,16 @@ import {
   IonBadge,
   IonText,
   IonButton,
+  IonSegment,
+  IonSegmentButton,
+  IonLabel,
 } from '@ionic/react';
 import { useAuthStore } from '../state/useAuthStore';
 import { useAccounts } from '../features/accounts/useAccounts';
 import { useBills } from '../features/bills/useBills';
 import { computeSpendableForAccount } from '../features/spendable/spendable';
 import { ProBadge } from '../components/ProBadge';
+import { OfflineBadge } from '../components/OfflineBadge';
 import { PageHeader } from '../components/PageHeader';
 import { computeRecommendations, getRecsDismissed, setRecsDismissed } from '../features/recs/recommendations';
 import { useTxnStore } from '../state/useTxnStore';
@@ -84,7 +88,7 @@ export const Dashboard: React.FC = () => {
 
   return (
     <IonPage>
-      <PageHeader title="Dashboard" start={<ProBadge />} />
+      <PageHeader title="Dashboard" start={<ProBadge />} end={<OfflineBadge />} />
       <IonContent className="ion-padding">
         {hasRecs && !recsDismissed ? (
           <IonCard>
@@ -110,18 +114,25 @@ export const Dashboard: React.FC = () => {
 
         <div className={styles.sectionCard}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <div className={styles.chipTabs}>
-              {[
-                { key: 'thisMonth', label: 'This Month' },
-                { key: 'thisWeek', label: 'This Week' },
-                { key: 'lastMonth', label: 'Last Month' },
-                { key: 'custom', label: 'Custom' },
-              ].map((tab) => (
-                <button key={tab.key} className={range === (tab.key as any) ? 'active' : ''} onClick={() => setRange(tab.key as any)}>
-                  {tab.label}
-                </button>
-              ))}
-            </div>
+            <IonSegment
+              value={range}
+              onIonChange={(e) => setRange(((e.detail.value as RangeKey) ?? 'thisMonth'))}
+              className={styles.rangeSegment}
+              scrollable
+            >
+              <IonSegmentButton value="thisMonth">
+                <IonLabel>This Month</IonLabel>
+              </IonSegmentButton>
+              <IonSegmentButton value="thisWeek">
+                <IonLabel>This Week</IonLabel>
+              </IonSegmentButton>
+              <IonSegmentButton value="lastMonth">
+                <IonLabel>Last Month</IonLabel>
+              </IonSegmentButton>
+              <IonSegmentButton value="custom">
+                <IonLabel>Custom</IonLabel>
+              </IonSegmentButton>
+            </IonSegment>
             <IonButton routerLink="/transactions/new" color="primary">Add Transaction</IonButton>
           </div>
         </div>

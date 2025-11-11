@@ -1,5 +1,6 @@
 import React from 'react';
 import { formatCurrency, formatSignedAmount } from '../../utils/format';
+import styles from './Money.module.css';
 
 interface MoneyProps {
   value: number;
@@ -12,6 +13,13 @@ export const Money: React.FC<MoneyProps> = ({ value, signed = false, type = 'neu
   const text = signed && (type === 'income' || type === 'expense')
     ? formatSignedAmount(type, Math.abs(value))
     : formatCurrency(value);
-  return <span className={className}>{text}</span>;
+
+  const classes = [styles.money];
+
+  if (type === 'income') classes.push(styles.income);
+  if (type === 'expense') classes.push(styles.expense);
+  if (className) classes.push(className);
+
+  return <span className={classes.join(' ')}>{text}</span>;
 };
 

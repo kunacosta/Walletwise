@@ -48,23 +48,8 @@
   margin-bottom: 16px;
 }
 
-.chipTabs {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.chipTabs button {
-  padding: 6px 12px;
-  border-radius: 12px;
-  border: 1px solid var(--ion-color-medium-tint);
-  background: var(--ion-color-step-100, #f2f2f4);
-}
-
-.chipTabs button.active {
-  background: var(--ion-color-primary);
-  color: white;
-  border-color: var(--ion-color-primary);
+.rangeSegment {
+  margin-top: 8px;
 }
 
 .listItemRow {
