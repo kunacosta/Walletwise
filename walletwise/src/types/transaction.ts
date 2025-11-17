@@ -6,7 +6,7 @@ export interface Transaction {
   amount: number;
   accountId?: string; // optional link to account
   category: string;
-  subcategory: string;
+  subcategory?: string;
   note?: string;
   date: Date;
   createdAt?: Date | null;
@@ -20,7 +20,7 @@ export interface TransactionInput {
   amount: number;
   accountId?: string;
   category: string;
-  subcategory: string;
+  subcategory?: string;
   note?: string;
   date: Date;
 }

@@ -16,6 +16,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../services/firebase';
 import type { Account } from '../../types/account';
+import { useSettings } from '../../state/settings';
 import { getCached, setCached } from '../../lib/cache';
 import { userAccountsKey } from '../../constants/cacheKeys';
 
@@ -32,6 +33,7 @@ const mapAccount = (snap: QueryDocumentSnapshot<DocumentData>): Account => {
     id: snap.id,
     name: String(data.name ?? ''),
     type: data.type as Account['type'],
+    currency: data.currency ? String(data.currency) : useSettings.getState().currency ?? 'USD',
     institution: data.institution ? String(data.institution) : undefined,
     numberMasked: data.numberMasked ? String(data.numberMasked) : undefined,
     balanceCurrent: Number(data.balanceCurrent ?? 0),
@@ -51,6 +53,7 @@ const deserialize = (raw: any): Account => ({
   id: String(raw.id),
   name: String(raw.name),
   type: raw.type,
+  currency: raw.currency ?? useSettings.getState().currency ?? 'USD',
   institution: raw.institution ?? undefined,
   numberMasked: raw.numberMasked ?? undefined,
   balanceCurrent: Number(raw.balanceCurrent ?? 0),
@@ -128,6 +131,7 @@ export const useAccounts = (uid: string | undefined, opts?: { isPro?: boolean })
       const payload: Record<string, unknown> = {
         name: input.name,
         type: input.type,
+        currency: input.currency ?? useSettings.getState().currency ?? 'USD',
         institution: input.institution ?? null,
         numberMasked: input.numberMasked ?? null,
         balanceCurrent: Number(input.balanceCurrent),
@@ -147,6 +151,7 @@ export const useAccounts = (uid: string | undefined, opts?: { isPro?: boolean })
       const payload: Record<string, unknown> = { updatedAt: serverTimestamp() };
       if (patch.name !== undefined) payload.name = patch.name;
       if (patch.type !== undefined) payload.type = patch.type;
+      if (patch.currency !== undefined) payload.currency = patch.currency ?? null;
       if (patch.institution !== undefined) payload.institution = patch.institution ?? null;
       if (patch.numberMasked !== undefined) payload.numberMasked = patch.numberMasked ?? null;
       if (patch.balanceCurrent !== undefined)
@@ -178,4 +183,3 @@ export const useAccounts = (uid: string | undefined, opts?: { isPro?: boolean })
     createDisabledReason,
   } as const;
 };
-

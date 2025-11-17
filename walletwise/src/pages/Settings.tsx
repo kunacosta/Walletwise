@@ -10,14 +10,18 @@ import {
   IonInput,
   IonSelect,
   IonSelectOption,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardContent,
 } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import { logout } from '../services/auth';
 import { updateProfile, updatePassword } from 'firebase/auth';
 import { auth } from '../services/firebase';
 import { useSettings } from '../state/settings';
-import { ProBadge } from '../components/ProBadge';
 import { useTxnStore } from '../state/useTxnStore';
+import { ProBadge } from '../components/ProBadge';
 import { useAuthStore } from '../state/useAuthStore';
 import { getFirestore, collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { ensurePermission } from '../features/notifications/scheduler';
@@ -30,11 +34,7 @@ export const Settings: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const notificationsEnabled = useSettings((s) => s.notificationsEnabled);
   const setNotificationsEnabled = useSettings((s) => s.setNotificationsEnabled);
-  const [permission, setPermission] = useState<string>('unknown');
-  const quietStart = useSettings((s) => s.quietHoursStart);
-  const quietEnd = useSettings((s) => s.quietHoursEnd);
-  const setQuietStart = (v: string | null) => { useSettings.setState({ quietHoursStart: v }); };
-  const setQuietEnd = (v: string | null) => { useSettings.setState({ quietHoursEnd: v }); };
+  const [, setPermission] = useState<string>('unknown');
 
   const theme = useSettings((s) => s.theme);
   const setTheme = useSettings((s) => s.setTheme);
@@ -53,6 +53,7 @@ export const Settings: React.FC = () => {
   const setBufferPercent = useSettings((s) => s.setBufferPercent);
   const includeCredit = useSettings((s) => s.includeCreditInSpendable);
   const setIncludeCredit = useSettings((s) => s.setIncludeCreditInSpendable);
+  const [showSpendableAdvanced, setShowSpendableAdvanced] = useState(false);
 
   useEffect(() => {
     // best-effort check
@@ -79,120 +80,164 @@ export const Settings: React.FC = () => {
   return (
     <IonPage>
       <PageHeader title="Settings" start={<ProBadge />} />
-      <IonContent className="ion-padding">
-        {user?.email ? (
-          <IonText>
-            <p>Signed in as {user.email}</p>
-          </IonText>
-        ) : null}
-        <ProfileSection />
-        <IonItem lines="full">
-          <IonLabel>Enable Notifications</IonLabel>
-          <IonToggle
-            checked={notificationsEnabled}
-            onIonChange={async (e) => {
-              const enabled = Boolean(e.detail.checked);
-              setNotificationsEnabled(enabled);
-              if (enabled) {
-                const ok = await ensurePermission();
-                setPermission(ok ? 'granted' : 'denied');
-              }
-            }}
-          />
-        </IonItem>
-        <IonText color="medium">
-          <p>Permission: {permission}</p>
-        </IonText>
-        <IonItem>
-          <IonLabel position="stacked">Quiet hours start</IonLabel>
-          <IonInput type="time" value={quietStart ?? ''} onIonInput={(e) => setQuietStart((e.detail.value as string) || null)} />
-        </IonItem>
-        <IonItem>
-          <IonLabel position="stacked">Quiet hours end</IonLabel>
-          <IonInput type="time" value={quietEnd ?? ''} onIonInput={(e) => setQuietEnd((e.detail.value as string) || null)} />
-        </IonItem>
-        <IonButton routerLink="/notifications" fill="outline" expand="block" className="ion-margin-top">
-          Notifications Center
-        </IonButton>
-        <h3 className="ion-margin-top">Pro</h3>
-        <ProSection />
+      <IonContent className="app-content">
+        <section className="header-gradient">
+          <div className="h1">Account controls</div>
+          <p className="body">{user?.email ? `Signed in as ${user.email}` : 'Manage preferences'}</p>
+        </section>
 
-        <h3 className="ion-margin-top">Appearance</h3>
-        <IonItem>
-          <IonLabel>Theme</IonLabel>
-          <IonSelect value={theme} onIonChange={(e) => setTheme((e.detail.value as any) ?? 'system')} interface="popover">
-            <IonSelectOption value="system">System</IonSelectOption>
-            <IonSelectOption value="light">Light</IonSelectOption>
-            <IonSelectOption value="dark">Dark</IonSelectOption>
-          </IonSelect>
-        </IonItem>
-        <IonItem>
-          <IonLabel>Currency</IonLabel>
-          <IonSelect value={currency} onIonChange={(e) => setCurrency((e.detail.value as string) || 'USD')} interface="popover">
-            <IonSelectOption value="USD">USD</IonSelectOption>
-            <IonSelectOption value="MYR">MYR</IonSelectOption>
-            <IonSelectOption value="EUR">EUR</IonSelectOption>
-            <IonSelectOption value="GBP">GBP</IonSelectOption>
-            <IonSelectOption value="INR">INR</IonSelectOption>
-          </IonSelect>
-        </IonItem>
-        <IonItem>
-          <IonLabel>First day of week</IonLabel>
-          <IonSelect value={firstDayOfWeek} onIonChange={(e) => setFirstDayOfWeek(((e.detail.value as number) ?? 0) as 0 | 1)} interface="popover">
-            <IonSelectOption value={0}>Sunday</IonSelectOption>
-            <IonSelectOption value={1}>Monday</IonSelectOption>
-          </IonSelect>
-        </IonItem>
+        <div className="section-stack">
+          <IonCard>
+            <IonCardHeader>
+              <IonCardTitle>Profile</IonCardTitle>
+            </IonCardHeader>
+            <IonCardContent>
+              <ProfileSection />
+            </IonCardContent>
+          </IonCard>
 
-        <h3 className="ion-margin-top">Spendable</h3>
-        <IonItem>
-          <IonLabel>Window</IonLabel>
-          <IonSelect value={spendWindowDays} onIonChange={(e) => setSpendWindowDays(Number(e.detail.value ?? 14))} interface="popover">
-            <IonSelectOption value={7}>7 days</IonSelectOption>
-            <IonSelectOption value={14}>14 days</IonSelectOption>
-            <IonSelectOption value={30}>30 days</IonSelectOption>
-          </IonSelect>
-        </IonItem>
-        <IonItem>
-          <IonLabel>Buffer Mode</IonLabel>
-          <IonSelect value={bufferMode} onIonChange={(e) => setBufferMode((e.detail.value as any) ?? 'fixed')} interface="popover">
-            <IonSelectOption value="fixed">Fixed</IonSelectOption>
-            <IonSelectOption value="percent">Percent</IonSelectOption>
-            <IonSelectOption value="none">None</IonSelectOption>
-          </IonSelect>
-        </IonItem>
-        {bufferMode === 'fixed' ? (
-          <IonItem>
-            <IonLabel position="stacked">Buffer Amount</IonLabel>
-            <IonInput type="number" inputmode="decimal" value={String(bufferValue)} onIonInput={(e) => setBufferValue(Number(e.detail.value ?? bufferValue))} />
-          </IonItem>
-        ) : null}
-        {bufferMode === 'percent' ? (
-          <IonItem>
-            <IonLabel position="stacked">Buffer Percent</IonLabel>
-            <IonInput type="number" inputmode="decimal" value={String(bufferPercent)} onIonInput={(e) => setBufferPercent(Number(e.detail.value ?? bufferPercent))} />
-          </IonItem>
-        ) : null}
-        <IonItem>
-          <IonLabel>Include credit accounts</IonLabel>
-          <IonToggle checked={includeCredit} onIonChange={(e) => setIncludeCredit(Boolean(e.detail.checked))} />
-        </IonItem>
+          <IonCard>
+              <IonCardHeader>
+                <IonCardTitle>Notifications</IonCardTitle>
+              </IonCardHeader>
+              <IonCardContent className="stack-gap">
+                <IonItem lines="full">
+                  <IonLabel>Enable Notifications</IonLabel>
+                  <IonToggle
+                    checked={notificationsEnabled}
+                    onIonChange={async (e) => {
+                      const enabled = Boolean(e.detail.checked);
+                      setNotificationsEnabled(enabled);
+                      if (enabled) {
+                        const ok = await ensurePermission();
+                        setPermission(ok ? 'granted' : 'denied');
+                      }
+                    }}
+                  />
+                </IonItem>
+                <IonButton routerLink="/notifications" fill="outline" expand="block">
+                  Notifications Center
+                </IonButton>
+              </IonCardContent>
+            </IonCard>
 
-        <DataSection />
-        {error ? (
-          <IonText color="danger" role="alert">
-            <p>{error}</p>
-          </IonText>
-        ) : null}
-        <IonButton
-          expand="block"
-          color="danger"
-          onClick={handleLogout}
-          disabled={submitting}
-          className="ion-margin-top"
-        >
-          {submitting ? 'Signing Out...' : 'Sign Out'}
-        </IonButton>
+          <IonCard>
+            <IonCardHeader>
+              <IonCardTitle>Appearance & Defaults</IonCardTitle>
+            </IonCardHeader>
+            <IonCardContent>
+              <IonItem>
+                <IonLabel>Theme</IonLabel>
+                <IonSelect value={theme} onIonChange={(e) => setTheme((e.detail.value as any) ?? 'system')} interface="popover">
+                  <IonSelectOption value="system">System</IonSelectOption>
+                  <IonSelectOption value="light">Light</IonSelectOption>
+                  <IonSelectOption value="dark">Dark</IonSelectOption>
+                </IonSelect>
+              </IonItem>
+              <IonItem>
+                <IonLabel>Currency</IonLabel>
+                <IonSelect value={currency} onIonChange={(e) => setCurrency((e.detail.value as string) || 'USD')} interface="popover">
+                  <IonSelectOption value="USD">USD</IonSelectOption>
+                  <IonSelectOption value="MYR">MYR</IonSelectOption>
+                  <IonSelectOption value="EUR">EUR</IonSelectOption>
+                  <IonSelectOption value="GBP">GBP</IonSelectOption>
+                  <IonSelectOption value="INR">INR</IonSelectOption>
+                </IonSelect>
+              </IonItem>
+              <IonItem>
+                <IonLabel>First day of week</IonLabel>
+                <IonSelect value={firstDayOfWeek} onIonChange={(e) => setFirstDayOfWeek(((e.detail.value as number) ?? 0) as 0 | 1)} interface="popover">
+                  <IonSelectOption value={0}>Sunday</IonSelectOption>
+                  <IonSelectOption value={1}>Monday</IonSelectOption>
+                </IonSelect>
+              </IonItem>
+            </IonCardContent>
+          </IonCard>
+
+          <IonCard>
+            <IonCardHeader>
+              <IonCardTitle>Spendable</IonCardTitle>
+            </IonCardHeader>
+            <IonCardContent>
+              <IonItem>
+                <IonLabel>Window</IonLabel>
+                <IonSelect value={spendWindowDays} onIonChange={(e) => setSpendWindowDays(Number(e.detail.value ?? 14))} interface="popover">
+                  <IonSelectOption value={7}>7 days</IonSelectOption>
+                  <IonSelectOption value={14}>14 days</IonSelectOption>
+                  <IonSelectOption value={30}>30 days</IonSelectOption>
+                </IonSelect>
+              </IonItem>
+              <IonItem>
+                <IonLabel>Include credit accounts</IonLabel>
+                <IonToggle checked={includeCredit} onIonChange={(e) => setIncludeCredit(Boolean(e.detail.checked))} />
+              </IonItem>
+              <IonButton
+                fill="outline"
+                color="medium"
+                expand="block"
+                className="ion-margin-top"
+                onClick={() => setShowSpendableAdvanced((prev) => !prev)}
+              >
+                {showSpendableAdvanced ? 'Hide advanced spendable controls' : 'Show advanced spendable controls'}
+              </IonButton>
+              {showSpendableAdvanced && (
+                <>
+                  <IonItem className="ion-margin-top">
+                    <IonLabel>Buffer Mode</IonLabel>
+                    <IonSelect value={bufferMode} onIonChange={(e) => setBufferMode((e.detail.value as any) ?? 'fixed')} interface="popover">
+                      <IonSelectOption value="fixed">Fixed</IonSelectOption>
+                      <IonSelectOption value="percent">Percent</IonSelectOption>
+                      <IonSelectOption value="none">None</IonSelectOption>
+                    </IonSelect>
+                  </IonItem>
+                  {bufferMode === 'fixed' ? (
+                    <IonItem>
+                      <IonLabel position="stacked">Buffer Amount</IonLabel>
+                      <IonInput type="number" inputMode="decimal" value={String(bufferValue)} onIonInput={(e) => setBufferValue(Number(e.detail.value ?? bufferValue))} />
+                    </IonItem>
+                  ) : null}
+                  {bufferMode === 'percent' ? (
+                    <IonItem>
+                      <IonLabel position="stacked">Buffer Percent</IonLabel>
+                      <IonInput type="number" inputMode="decimal" value={String(bufferPercent)} onIonInput={(e) => setBufferPercent(Number(e.detail.value ?? bufferPercent))} />
+                    </IonItem>
+                  ) : null}
+                </>
+              )}
+            </IonCardContent>
+          </IonCard>
+
+          <IonCard>
+            <IonCardHeader>
+              <IonCardTitle>Pro</IonCardTitle>
+            </IonCardHeader>
+            <IonCardContent>
+              <ProSection />
+            </IonCardContent>
+          </IonCard>
+
+          <IonCard>
+            <IonCardHeader>
+              <IonCardTitle>Data & Sign out</IonCardTitle>
+            </IonCardHeader>
+            <IonCardContent className="stack-gap">
+              <DataSection />
+              {error ? (
+                <IonText color="danger" role="alert">
+                  <p>{error}</p>
+                </IonText>
+              ) : null}
+              <IonButton
+                expand="block"
+                color="danger"
+                onClick={handleLogout}
+                disabled={submitting}
+              >
+                {submitting ? 'Signing Out...' : 'Sign Out'}
+              </IonButton>
+            </IonCardContent>
+          </IonCard>
+        </div>
       </IonContent>
     </IonPage>
   );
@@ -220,6 +265,9 @@ const ProSection: React.FC = () => {
         {isPro && proExpiresAt ? (
           <p>Expires: {proExpiresAt.toDateString()}</p>
         ) : null}
+        {!isPro && (
+          <p>This is a prototype Pro toggle for this app demo; no real billing is connected.</p>
+        )}
       </IonText>
       {isPro ? (
         <IonButton color="medium" onClick={downgrade} expand="block">Downgrade to Free</IonButton>
@@ -240,20 +288,22 @@ const ProSection: React.FC = () => {
 };
 
 const ProfileSection: React.FC = () => {
-  const { user } = useAuthStore();
+  const { user, setUser } = useAuthStore();
   const [displayName, setDisplayName] = useState<string>(user?.displayName ?? '');
-  const [photoURL, setPhotoURL] = useState<string>(user?.photoURL ?? '');
   const [newPassword, setNewPassword] = useState<string>('');
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState(false);
 
   const saveProfile = async () => {
     if (!auth.currentUser) return;
     setSaving(true);
     setMessage(null);
     try {
-      await updateProfile(auth.currentUser, { displayName: displayName || null, photoURL: photoURL || null });
+      await updateProfile(auth.currentUser, { displayName: displayName || null });
       setMessage('Profile updated');
+      setUser(auth.currentUser);
+      setEditingName(false);
     } catch (e: any) {
       setMessage(e?.message || 'Failed to update profile');
     } finally {
@@ -280,14 +330,48 @@ const ProfileSection: React.FC = () => {
     <>
       <h3>Profile</h3>
       <IonItem>
-        <IonLabel position="stacked">Name</IonLabel>
-        <IonInput value={displayName} onIonInput={(e) => setDisplayName(e.detail.value ?? '')} />
+        <IonLabel position="stacked">Email</IonLabel>
+        <IonInput value={user?.email ?? ''} readonly />
       </IonItem>
       <IonItem>
-        <IonLabel position="stacked">Photo URL</IonLabel>
-        <IonInput value={photoURL} onIonInput={(e) => setPhotoURL(e.detail.value ?? '')} />
+        <IonLabel position="stacked">Display name (for greeting)</IonLabel>
+        {editingName ? (
+          <IonInput
+            value={displayName}
+            onIonInput={(e) => setDisplayName(e.detail.value ?? '')}
+          />
+        ) : (
+          <IonText>
+            <p>{displayName || 'Not set'}</p>
+          </IonText>
+        )}
       </IonItem>
-      <IonButton className="ion-margin-top" onClick={saveProfile} disabled={saving}>Save Profile</IonButton>
+      {editingName ? (
+        <div className="ion-margin-top">
+          <IonButton onClick={saveProfile} disabled={saving}>
+            Save name
+          </IonButton>
+          <IonButton
+            fill="outline"
+            color="medium"
+            onClick={() => {
+              setDisplayName(user?.displayName ?? '');
+              setEditingName(false);
+            }}
+            disabled={saving}
+          >
+            Cancel
+          </IonButton>
+        </div>
+      ) : (
+        <IonButton
+          className="ion-margin-top"
+          fill="outline"
+          onClick={() => setEditingName(true)}
+        >
+          Edit display name
+        </IonButton>
+      )}
       <h4 className="ion-margin-top">Change Password</h4>
       <IonItem>
         <IonLabel position="stacked">New Password</IonLabel>
@@ -306,17 +390,17 @@ const DataSection: React.FC = () => {
   const isPro = useSettings((s) => s.isPro);
   const { user } = useAuthStore();
   const [busy, setBusy] = React.useState(false);
+  const [showAdvanced, setShowAdvanced] = React.useState(false);
 
   const exportCsv = async () => {
     const month = new Date();
     const txns = isPro ? items : items.filter((t) => t.date.getFullYear() === month.getFullYear() && t.date.getMonth() === month.getMonth());
-    const header = ['id','type','amount','category','subcategory','note','date'];
+    const header = ['id','type','amount','category','note','date'];
     const rows = txns.map((t) => [
       t.id,
       t.type,
       t.amount.toFixed(2),
       t.category ?? '',
-      t.subcategory ?? '',
       (t.note ?? '').replace(/\n/g, ' '),
       t.date.toISOString(),
     ]);
@@ -365,8 +449,27 @@ const DataSection: React.FC = () => {
     <>
       <h3 className="ion-margin-top">Data</h3>
       <IonButton onClick={exportCsv} expand="block">Export CSV ({isPro ? 'All' : 'Current month'})</IonButton>
-      <IonButton onClick={clearCache} expand="block" color="medium" disabled={busy}>Clear Cache</IonButton>
-      <IonButton onClick={resetDemoData} expand="block" color="danger" fill="outline" disabled={busy}>Reset Demo Data</IonButton>
+      <IonButton
+        onClick={() => setShowAdvanced((prev) => !prev)}
+        expand="block"
+        fill="outline"
+        color="medium"
+      >
+        {showAdvanced ? 'Hide advanced data tools' : 'Show advanced data tools'}
+      </IonButton>
+      {showAdvanced && (
+        <>
+          <IonText color="medium">
+            <p>These actions are advanced and can remove local or demo data. Use with care.</p>
+          </IonText>
+          <IonButton onClick={clearCache} expand="block" color="medium" disabled={busy}>
+            Clear app cache (advanced)
+          </IonButton>
+          <IonButton onClick={resetDemoData} expand="block" color="danger" fill="outline" disabled={busy}>
+            Reset demo data (advanced)
+          </IonButton>
+        </>
+      )}
     </>
   );
 };

@@ -10,7 +10,6 @@ import {
   type InputCustomEvent,
   type InputChangeEventDetail,
 } from '@ionic/react';
-import { PageHeader } from '../components/PageHeader';
 import { useHistory } from 'react-router-dom';
 import { login } from '../services/auth';
 import { useAuthStore } from '../state/useAuthStore';
@@ -55,50 +54,56 @@ export const Login: React.FC = () => {
 
   return (
     <IonPage>
-      <PageHeader title="Walletwise Login" />
-      <IonContent className="ion-padding centered-page">
-        <form onSubmit={handleSubmit}>
-          <IonList inset className="container-narrow">
-            <IonItem>
-              <IonInput
-                label="Email"
-                labelPlacement="stacked"
-                type="email"
-                value={email}
-                required
-                onIonInput={handleEmailChange}
-                autocomplete="email"
-              />
-            </IonItem>
-            <IonItem>
-              <IonInput
-                label="Password"
-                labelPlacement="stacked"
-                type="password"
-                value={password}
-                required
-                onIonInput={handlePasswordChange}
-                autocomplete="current-password"
-              />
-            </IonItem>
-          </IonList>
-          {error ? (
-            <IonText color="danger" role="alert">
-              <p>{error}</p>
-            </IonText>
-          ) : null}
-          <IonButton
-            type="submit"
-            expand="block"
-            className="ion-margin-top container-narrow"
-            disabled={submitting}
-          >
-            {submitting ? 'Signing In...' : 'Sign In'}
-          </IonButton>
-        </form>
-        <IonButton routerLink="/register" fill="clear" expand="block" className="ion-margin-top container-narrow">
-          Create an account
-        </IonButton>
+      <IonContent className="centered-page">
+        <div className="auth-layout">
+          <div className="auth-card">
+            <p className="badge-pill">Walletwise</p>
+            <h1>Welcome back.</h1>
+            <p>Sign in to orchestrate your spending plan with the new Walletwise surface.</p>
+            <form onSubmit={handleSubmit}>
+              <IonList inset>
+                <IonItem>
+                  <IonInput
+                    label="Email"
+                    labelPlacement="stacked"
+                    type="email"
+                    value={email}
+                    required
+                    onIonInput={handleEmailChange}
+                    autocomplete="email"
+                  />
+                </IonItem>
+                <IonItem>
+                  <IonInput
+                    label="Password"
+                    labelPlacement="stacked"
+                    type="password"
+                    value={password}
+                    required
+                    onIonInput={handlePasswordChange}
+                    autocomplete="current-password"
+                  />
+                </IonItem>
+              </IonList>
+              {error ? (
+                <IonText color="danger" role="alert">
+                  <p>{error}</p>
+                </IonText>
+              ) : null}
+              <IonButton
+                type="submit"
+                expand="block"
+                className="ion-margin-top"
+                disabled={submitting}
+              >
+                {submitting ? 'Signing In...' : 'Sign In'}
+              </IonButton>
+            </form>
+            <IonButton routerLink="/register" fill="clear" expand="block" className="ion-margin-top">
+              Create an account
+            </IonButton>
+          </div>
+        </div>
       </IonContent>
     </IonPage>
   );

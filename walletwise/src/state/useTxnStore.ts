@@ -58,7 +58,7 @@ export const useTxnStore = create<TxnState>((set, get) => ({
         amount: number;
         accountId?: string | null;
         category: string;
-        subcategory: string;
+        subcategory?: string;
         note?: string;
         date: string;
         createdAt?: string | null;
@@ -72,7 +72,7 @@ export const useTxnStore = create<TxnState>((set, get) => ({
           amount: c.amount,
           category: c.category,
           accountId: c.accountId ?? undefined,
-          subcategory: c.subcategory,
+          subcategory: c.subcategory ?? undefined,
           note: c.note,
           date: new Date(c.date),
           createdAt: c.createdAt ? new Date(c.createdAt) : null,
@@ -111,7 +111,7 @@ export const useTxnStore = create<TxnState>((set, get) => ({
             amount: t.amount,
             accountId: t.accountId ?? null,
             category: t.category,
-            subcategory: t.subcategory,
+            subcategory: t.subcategory ?? undefined,
             note: t.note,
             date: t.date.toISOString(),
             createdAt: t.createdAt ? t.createdAt.toISOString() : null,

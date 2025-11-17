@@ -88,7 +88,7 @@ const mapTransaction = (snapshot: QueryDocumentSnapshot<DocumentData>): Transact
     amount: Number(data.amount ?? 0),
     accountId: data.accountId ? String(data.accountId) : undefined,
     category: String(data.category ?? ''),
-    subcategory: String(data.subcategory ?? ''),
+    subcategory: data.subcategory ? String(data.subcategory) : undefined,
     note: typeof data.note === 'string' && data.note.length > 0 ? data.note : undefined,
     date: dateValue instanceof Timestamp ? dateValue.toDate() : (dateValue as Date),
     createdAt: convertTimestamp(data.createdAt),
@@ -183,7 +183,6 @@ export const addTransfer = async (input: {
     note: input.note ?? null,
     transferId: linkId,
     category: 'Transfer',
-    subcategory: 'Internal',
   } as Record<string, unknown>;
   // Expense from source
   const fromDoc = doc(ref);

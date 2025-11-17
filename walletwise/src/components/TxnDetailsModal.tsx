@@ -104,12 +104,6 @@ export const TxnDetailsModal: React.FC<TxnDetailsModalProps> = ({ isOpen, transa
           </IonItem>
           <IonItem>
             <IonLabel>
-              <h3>Subcategory</h3>
-              <p>{transaction.subcategory}</p>
-            </IonLabel>
-          </IonItem>
-          <IonItem>
-            <IonLabel>
               <h3>Date & Time</h3>
               <p>{formatDateTime(transaction.date)}</p>
             </IonLabel>

@@ -1,67 +1,88 @@
-.section {
-  margin-bottom: 16px; /* 2 x 8px */
-}
-
-.topCard {
-  margin-bottom: 16px;
-}
-
-.summaryValue {
-  font-size: 28px;
-  font-weight: 800;
-  line-height: 1.2;
-}
-
-.summarySubtext {
-  color: var(--ion-color-medium);
-}
-
-.statsGrid {
+.visualGrid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.25rem;
 }
 
-@media (min-width: 576px) {
-  .statsGrid {
-    grid-template-columns: repeat(3, 1fr);
+.donutArea {
+  display: grid;
+  grid-template-columns: minmax(220px, 260px) 1fr;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+@media (max-width: 640px) {
+  .donutArea {
+    grid-template-columns: 1fr;
   }
 }
 
-.accountsSection {
-  margin-top: 16px;
+.legendList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
 }
 
-.kpiGrid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-}
-
-@media (min-width: 768px) {
-  .kpiGrid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.sectionCard {
-  margin-bottom: 16px;
-}
-
-.rangeSegment {
-  margin-top: 8px;
-}
-
-.listItemRow {
+.legendRow {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.6rem;
 }
 
-.categoryLegend {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px 12px;
-  margin-top: 8px;
-  font-size: 12px;
+.legendSwatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.legendAmount {
+  margin-left: auto;
+  font-weight: 600;
+}
+
+.txnList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.txnRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0.15rem;
+  border-bottom: 1px solid rgba(15, 18, 36, 0.08);
+}
+
+.txnRow:last-child {
+  border-bottom: none;
+}
+
+.txnCategory {
+  font-weight: 600;
+  color: var(--ion-text-color);
+}
+
+.txnMeta {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.recs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.recsRow {
+  display: flex;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.chartEmpty {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: 2rem 0;
 }

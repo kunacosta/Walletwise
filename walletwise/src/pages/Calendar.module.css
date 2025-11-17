@@ -1,46 +1,297 @@
-.summaryToolbar {
-  --padding-start: 12px;
-  --padding-end: 12px;
-  --min-height: 44px;
+.weekday {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  color: var(--ion-text-color-step-600);
+  padding-bottom: 8px;
 }
 
-.summaryRow {
+.calendarCard :global(.ion-row) {
+  margin-bottom: 10px;
+}
+
+.dayList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dayCard {
+  width: 100%;
+  min-height: 140px;
+  background: var(--surface-2);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  line-height: 1.35;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  background-image: radial-gradient(120% 120% at 100% 0%, rgba(99, 102, 241, 0.12), transparent);
+}
+
+.dayCard::after {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.18), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.dayCard:hover {
+  transform: translateY(-2px);
+  border-color: var(--ion-color-primary);
+  box-shadow: var(--elev-1);
+}
+
+.dayCard:hover::after {
+  opacity: 1;
+}
+
+.dayCardToday {
+  border-color: var(--ion-color-primary);
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.2), var(--elev-1);
+}
+
+.dayCardToneNeutral {
+  /* subtle neutral state */
+}
+
+.dayCardToneSurplus {
+  border-color: rgba(34, 197, 94, 0.7);
+}
+
+.dayCardToneDeficit {
+  border-color: rgba(239, 68, 68, 0.7);
+}
+
+.dayCardMuted {
+  background: var(--surface-1);
+  color: var(--ion-text-color-step-600);
+  border-color: rgba(148, 163, 184, 0.28);
+}
+
+.dayCard:focus-visible {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 2px;
+}
+
+.dayHeader {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
-  font-size: 0.9rem;
+  align-items: center;
+  gap: 8px;
+}
+
+.dayHeaderMain {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.dayNumber {
+  font-weight: 800;
+  font-size: 22px;
+}
+
+.todayPill {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(99, 102, 241, 0.2);
+  color: var(--ion-color-primary);
+}
+
+.dayHighlights {
+  display: flex;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
-.summaryRow span {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+.daySummaryRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
 }
 
-.weekday {
-  font-weight: 600;
-}
-
-.netWrapper {
-  margin-top: 8px;
-}
-
-/* Day card sizing and layout for consistent grid */
-.dayCard {
-  min-height: 92px;
-}
-.dayCardContent {
+.daySummaryGroup {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  min-width: 0;
 }
-.dayHeader {
+
+.summaryLabel {
+  font-size: 12px;
+  color: var(--ion-text-color-step-600);
+}
+
+.summaryValuePositive {
+  font-size: 14px;
+  color: #4ade80;
+}
+
+.summaryValueNegative {
+  font-size: 14px;
+  color: #f97373;
+}
+
+.summaryValueNeutral {
+  font-size: 14px;
+  color: var(--ion-text-color);
+}
+
+.inlineBadge {
+  font-size: 12px;
+  text-transform: none;
+  border-radius: 999px;
+  padding: 3px 8px;
+}
+
+.activityChips {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 22px;
+}
+
+.activityChip {
+  font-size: 13px;
+  padding: 4px 8px;
+  border-radius: 10px;
+  background: rgba(148, 163, 184, 0.16);
+  color: var(--ion-text-color);
+}
+
+.activityChipIncome {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+
+.activityChipExpense {
+  background: rgba(248, 113, 113, 0.18);
+  color: #f87171;
+}
+
+.activityChipMore {
+  font-size: 13px;
+  color: var(--ion-text-color-step-600);
+}
+
+.emptyHint {
+  font-size: 14px;
+  color: var(--ion-text-color-step-600);
+}
+
+.dayModalSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.dayModalHeader {
+  display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 8px;
 }
-.dayNumber {
-  font-weight: 700;
+
+.dayModalTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.dayModalTone {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: rgba(15, 23, 42, 0.8);
+  color: var(--ion-text-color);
+  white-space: nowrap;
+}
+
+.dayModalToneNeutral {
+  opacity: 0.9;
+}
+
+.dayModalToneSurplus {
+  border-color: rgba(34, 197, 94, 0.7);
+  color: #bbf7d0;
+}
+
+.dayModalToneDeficit {
+  border-color: rgba(239, 68, 68, 0.7);
+  color: #fecaca;
+}
+
+.dayModalTotals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.totalPill {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.totalLabel {
+  font-size: 11px;
+  color: var(--ion-text-color-step-600);
+}
+
+.totalValuePositive {
+  font-size: 15px;
+  font-weight: 600;
+  color: #4ade80;
+}
+
+.totalValueNegative {
+  font-size: 15px;
+  font-weight: 600;
+  color: #f87171;
+}
+
+.totalValueNeutral {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ion-text-color);
+}
+
+.dayModalMeta {
+  font-size: 13px;
+  color: var(--ion-text-color-step-600);
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .dayCard {
+    min-height: 120px;
+    padding: 12px;
+  }
+
+  .dayModalTotals {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }

@@ -75,20 +75,99 @@ const deserialize = (raw: any): Category => ({
   updatedAt: raw.updatedAt ? new Date(raw.updatedAt) : null,
 });
 
-const DEFAULTS: Array<Omit<Category, 'id'>> = [
-  // Expense
-  { name: 'Food & drinks', type: 'expense', isSystem: true, subcategories: ['Groceries', 'Dining', 'Coffee/Tea'] },
-  { name: 'Housing', type: 'expense', isSystem: true, subcategories: ['Rent/Mortgage', 'Utilities', 'Maintenance'] },
-  { name: 'Shopping', type: 'expense', isSystem: true, subcategories: ['Clothing', 'Household', 'Gifts'] },
-  { name: 'Transportation', type: 'expense', isSystem: true, subcategories: ['Transit', 'Ride Share', 'Taxi'] },
-  { name: 'Vehicle', type: 'expense', isSystem: true, subcategories: ['Fuel', 'Service', 'Insurance'] },
-  { name: 'Life & entertainment', type: 'expense', isSystem: true, subcategories: ['Travel', 'Entertainment', 'Hobbies'] },
-  { name: 'Electronics', type: 'expense', isSystem: true, subcategories: ['Devices', 'Accessories', 'Subscriptions'] },
-  { name: 'Utilities', type: 'expense', isSystem: true, subcategories: ['Electricity', 'Water', 'Internet', 'Phone'] },
-  { name: 'Healthcare', type: 'expense', isSystem: true, subcategories: ['Doctor', 'Pharmacy', 'Insurance'] },
-  { name: 'Education', type: 'expense', isSystem: true, subcategories: ['Tuition', 'Books', 'Courses'] },
+export const CATEGORY_DEFAULTS: Array<Omit<Category, 'id'>> = [
+  // Expenses
+  {
+    name: 'Food & Drinks',
+    type: 'expense',
+    isSystem: true,
+    subcategories: ['Meals', 'Snacks', 'Groceries', 'Coffee/Tea', 'Dining Out'],
+  },
+  {
+    name: 'Transport',
+    type: 'expense',
+    isSystem: true,
+    subcategories: ['Petrol', 'Parking', 'Tolls', 'Public Transport', 'E-hailing'],
+  },
+  {
+    name: 'Home & Utilities',
+    type: 'expense',
+    isSystem: true,
+    subcategories: ['Rent', 'Electricity', 'Water', 'Internet', 'Maintenance'],
+  },
+  {
+    name: 'Shopping',
+    type: 'expense',
+    isSystem: true,
+    subcategories: ['Clothing', 'Accessories', 'Electronics', 'Household Items'],
+  },
+  {
+    name: 'Health',
+    type: 'expense',
+    isSystem: true,
+    subcategories: ['Clinic', 'Pharmacy', 'Supplements', 'Insurance (Medical)'],
+  },
+  {
+    name: 'Entertainment',
+    type: 'expense',
+    isSystem: true,
+    subcategories: ['Movies', 'Gaming', 'Streaming Subscriptions', 'Events/Concerts'],
+  },
+  {
+    name: 'Education',
+    type: 'expense',
+    isSystem: true,
+    subcategories: ['Tuition', 'Books', 'Online Courses', 'Software Tools'],
+  },
+  {
+    name: 'Personal Care',
+    type: 'expense',
+    isSystem: true,
+    subcategories: ['Haircut', 'Skincare', 'Grooming', 'Fitness/Gym'],
+  },
+  {
+    name: 'Bills',
+    type: 'expense',
+    isSystem: true,
+    subcategories: ['Mobile Plan', 'Subscriptions', 'Insurance', 'Loan Payment'],
+  },
   // Income
-  { name: 'Income', type: 'income', isSystem: true, subcategories: ['Salary', 'Bonus', 'Side Hustle', 'Investments'] },
+  {
+    name: 'Salary',
+    type: 'income',
+    isSystem: true,
+    subcategories: ['Main Job', 'Overtime', 'Bonus'],
+  },
+  {
+    name: 'Business',
+    type: 'income',
+    isSystem: true,
+    subcategories: ['Sales', 'Client Payments'],
+  },
+  {
+    name: 'Investments',
+    type: 'income',
+    isSystem: true,
+    subcategories: ['Dividends', 'Trading Profit', 'Staking/Interest'],
+  },
+  {
+    name: 'Others',
+    type: 'income',
+    isSystem: true,
+    subcategories: ['Cashback', 'Gifts', 'Refunds'],
+  },
+  {
+    name: 'Savings & Goals',
+    type: 'income',
+    isSystem: true,
+    subcategories: ['Emergency Fund', 'Car Savings', 'Vacation Fund', 'House Deposit'],
+  },
+  {
+    name: 'Transfers',
+    type: 'income',
+    isSystem: true,
+    subcategories: ['To Bank', 'From Bank', 'To eWallet', 'From eWallet'],
+  },
 ];
 
 export const useCategories = (uid: string | undefined) => {
@@ -127,7 +206,7 @@ export const useCategories = (uid: string | undefined) => {
           if (!seededRef.current && list.length === 0) {
             try {
               seededRef.current = true;
-              for (const d of DEFAULTS) {
+              for (const d of CATEGORY_DEFAULTS) {
                 await addDoc(categoriesRef(uid), {
                   name: d.name,
                   type: d.type,
@@ -232,4 +311,3 @@ export const useCategories = (uid: string | undefined) => {
     reassignTransactions,
   } as const;
 };
-

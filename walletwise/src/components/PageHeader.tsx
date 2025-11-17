@@ -1,25 +1,35 @@
 import React from 'react';
-import { IonHeader, IonToolbar, IonTitle, IonButtons } from '@ionic/react';
+import { IonHeader, IonToolbar, IonTitle, IonMenuButton, IonButtons } from '@ionic/react';
+import { SyncIndicator } from './SyncIndicator';
 
 interface PageHeaderProps {
   title: string;
   subtitle?: string;
+  description?: string;
   start?: React.ReactNode;
   end?: React.ReactNode;
 }
 
-export const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, start, end }) => (
-  <IonHeader>
-    <IonToolbar>
-      {start ? <IonButtons slot="start">{start}</IonButtons> : null}
-      <IonTitle>
-        {title}
-        {subtitle ? (
-          <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--ion-color-medium)' }}>{subtitle}</div>
+export const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, description, start, end }) => (
+  <IonHeader translucent>
+    <IonToolbar className="app-toolbar" mode="md">
+      <IonButtons slot="start">
+        <IonMenuButton />
+        {start ? (
+          <div className="toolbar-slot toolbar-slot--start">
+            {start}
+          </div>
         ) : null}
+      </IonButtons>
+      <IonTitle>
+        <div className="h1">{title}</div>
+        {subtitle ? <div className="app-toolbar__subtitle">{subtitle}</div> : null}
+        {description ? <div className="app-toolbar__subtitle">{description}</div> : null}
       </IonTitle>
-      {end ? <IonButtons slot="end">{end}</IonButtons> : null}
+      <div slot="end" className="toolbar-slot toolbar-slot--end">
+        {end}
+        <SyncIndicator />
+      </div>
     </IonToolbar>
   </IonHeader>
 );
-

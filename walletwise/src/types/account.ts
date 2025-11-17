@@ -4,6 +4,7 @@ export interface Account {
   id: string;
   name: string;
   type: AccountType;
+  currency?: string; // ISO 4217 code, e.g., 'USD'
   institution?: string;
   numberMasked?: string;
   balanceCurrent: number;

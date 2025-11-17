@@ -16,9 +16,7 @@ export const TxnItem: React.FC<TxnItemProps> = ({ transaction, onView }) => {
 
   const amountClass = transaction.type === 'income' ? 'txn-amount income' : 'txn-amount expense';
 
-  const title = transaction.subcategory
-    ? `${transaction.category} - ${transaction.subcategory}`
-    : transaction.category;
+  const title = transaction.category;
 
   return (
     <IonItem button onClick={handleView} detail lines="full">

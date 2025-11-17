@@ -23,17 +23,25 @@ ChartJS.register(
   Legend,
 );
 
-export const LineChart: React.FC<{ labels: string[]; values: number[]; height?: number }>
-  = ({ labels, values, height = 200 }) => {
+type LineChartProps = {
+  labels: string[];
+  values: number[];
+  height?: number;
+  filled?: boolean;
+  color?: string;
+};
+
+export const LineChart: React.FC<LineChartProps>
+  = ({ labels, values, height = 200, filled = true, color = 'rgba(56, 128, 255, 1)' }) => {
   const data: any = {
     labels,
     datasets: [
       {
         label: 'Spend',
         data: values,
-        borderColor: 'rgba(56, 128, 255, 1)', // ion-color-primary
-        backgroundColor: 'rgba(56, 128, 255, 0.15)',
-        fill: true,
+        borderColor: color, // ion-color-primary by default
+        backgroundColor: filled ? 'rgba(56, 128, 255, 0.15)' : 'transparent',
+        fill: filled,
         tension: 0.35,
         pointRadius: 3,
       },

@@ -45,7 +45,6 @@ interface FormState {
   type: TransactionType;
   amount: string;
   category: string;
-  subcategory: string;
   note: string;
   dateIso: string;
 }
@@ -54,13 +53,11 @@ const buildInitialState = (transaction?: Transaction, initialDate?: Date): FormS
   const baseDate = transaction?.date ?? initialDate ?? new Date();
   const type = transaction?.type ?? 'expense';
   const defaultCategory = transaction?.category ?? 'General';
-  const defaultSub = transaction?.subcategory ?? 'General';
 
   return {
     type,
     amount: transaction ? transaction.amount.toString() : '',
     category: defaultCategory,
-    subcategory: defaultSub,
     note: transaction?.note ?? '',
     dateIso: baseDate.toISOString(),
   };
@@ -110,21 +107,9 @@ export const TxnModal: React.FC<TxnModalProps> = ({
       setForm((prev) => ({
         ...prev,
         category: fallback?.name ?? 'General',
-        subcategory: (fallback?.subcategories && fallback.subcategories[0]) ?? 'General',
       }));
     }
   }, [availableCategories, form.category]);
-
-  useEffect(() => {
-    const categoryConfig = availableCategories.find((c) => c.name === form.category);
-    const subs = categoryConfig?.subcategories ?? [];
-    if (!subs.includes(form.subcategory)) {
-      setForm((prev) => ({
-        ...prev,
-        subcategory: subs[0] ?? 'General',
-      }));
-    }
-  }, [availableCategories, form.category, form.subcategory]);
 
   const handleTypeChange = (value: string) => {
     if (value === 'income' || value === 'expense') {
@@ -134,7 +119,6 @@ export const TxnModal: React.FC<TxnModalProps> = ({
         ...prev,
         type: value,
         category: first?.name ?? 'General',
-        subcategory: (first?.subcategories && first.subcategories[0]) ?? 'General',
       }));
     }
   };
@@ -163,13 +147,11 @@ export const TxnModal: React.FC<TxnModalProps> = ({
     }
 
     const trimmedCategory = form.category.trim();
-    const trimmedSubcategory = form.subcategory.trim();
-
     const payload: TransactionInput = {
       type: form.type,
       amount: Number(amountValue.toFixed(2)),
       category: trimmedCategory.length > 0 ? trimmedCategory : 'General',
-      subcategory: trimmedSubcategory.length > 0 ? trimmedSubcategory : 'General',
+      subcategory: '',
       note: form.note.trim() || undefined,
       date,
     };
@@ -219,15 +201,7 @@ export const TxnModal: React.FC<TxnModalProps> = ({
           onSuccess('Transaction updated');
           onDismiss();
         } catch (error) {
-          updateLocal(transaction.id, {
-            type: original.type,
-            amount: original.amount,
-            category: original.category,
-            subcategory: original.subcategory,
-            note: original.note,
-            date: original.date,
-            updatedAt: original.updatedAt ?? new Date(),
-          });
+          updateLocal(transaction.id, original);
           const message = error instanceof Error ? error.message : 'Failed to update transaction.';
           setStoreError(message);
           onError(message);
@@ -271,29 +245,20 @@ export const TxnModal: React.FC<TxnModalProps> = ({
   };
 
   return (
-    <IonModal isOpen={isOpen} onDidDismiss={onDismiss} breakpoints={[0, 0.45, 0.8]} initialBreakpoint={0.8}>
+    <IonModal isOpen={isOpen} onDidDismiss={onDismiss} swipeToClose={false}>
       <IonHeader>
         <IonToolbar>
           <IonButtons slot="start">
             <IonButton onClick={onDismiss} disabled={submitting}>
               Cancel
             </IonButton>
-            {mode === 'edit' ? (
-              <IonButton color="danger" fill="outline" onClick={handleDelete} disabled={submitting}>
-                Delete
-              </IonButton>
-            ) : null}
           </IonButtons>
           <IonTitle>{mode === 'create' ? 'Add Transaction' : 'Edit Transaction'}</IonTitle>
-          <IonButtons slot="end">
-            <IonButton onClick={handleSubmit} disabled={submitting}>
-              {mode === 'create' ? 'Add' : 'Save'}
-            </IonButton>
-          </IonButtons>
         </IonToolbar>
       </IonHeader>
       <IonContent className="ion-padding">
         <IonSegment
+          className="txn-type-segment"
           value={form.type}
           onIonChange={(event) => handleTypeChange(event.detail.value as string)}
         >
@@ -315,9 +280,11 @@ export const TxnModal: React.FC<TxnModalProps> = ({
             />
           </IonItem>
 
-          <IonItem>
+          <IonItem className="txn-date-item">
             <IonLabel position="stacked">Date</IonLabel>
-            <IonDatetimeButton datetime="ledger-txn-date" />
+            <div className="txn-date-row">
+              <IonDatetimeButton datetime="ledger-txn-date" className="txn-date-button" />
+            </div>
           </IonItem>
 
           <IonItem>
@@ -336,27 +303,6 @@ export const TxnModal: React.FC<TxnModalProps> = ({
                   {cat.name}
                 </IonSelectOption>
               ))}
-            </IonSelect>
-          </IonItem>
-
-          <IonItem>
-            <IonLabel position="stacked">Subcategory</IonLabel>
-            <IonSelect
-              value={form.subcategory}
-              onIonChange={(event) =>
-                setForm((prev) => ({
-                  ...prev,
-                  subcategory: (event.detail.value as string) ?? prev.subcategory,
-                }))
-              }
-            >
-              {(availableCategories.find((cat) => cat.name === form.category)?.subcategories ?? ['General']).map(
-                (sub) => (
-                  <IonSelectOption key={sub} value={sub}>
-                    {sub}
-                  </IonSelectOption>
-                ),
-              )}
             </IonSelect>
           </IonItem>
 
@@ -393,6 +339,17 @@ export const TxnModal: React.FC<TxnModalProps> = ({
           <IonButton expand="block" onClick={handleSubmit} disabled={submitting}>
             {submitting ? 'Saving...' : mode === 'create' ? 'Add Transaction' : 'Save Changes'}
           </IonButton>
+          {mode === 'edit' ? (
+            <IonButton
+              expand="block"
+              color="danger"
+              fill="outline"
+              onClick={handleDelete}
+              disabled={submitting}
+            >
+              Delete Transaction
+            </IonButton>
+          ) : null}
         </IonToolbar>
       </IonFooter>
     </IonModal>

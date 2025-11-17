@@ -11,13 +11,15 @@ import {
   IonRefresher,
   IonRefresherContent,
   IonToast,
-  IonGrid,
-  IonRow,
-  IonCol,
   IonButton,
   IonSegment,
   IonSegmentButton,
   IonSearchbar,
+  IonChip,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardContent,
 } from '@ionic/react';
 import { addOutline, chevronBackOutline, chevronForwardOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
@@ -43,7 +45,7 @@ interface ToastState {
   color: 'success' | 'danger' | 'medium';
 }
 
-export const Ledger: React.FC = () => {
+export const Transactions: React.FC = () => {
   const { user } = useAuthStore();
   const history = useHistory();
   const items = useTxnStore((state) => state.items);
@@ -61,7 +63,7 @@ export const Ledger: React.FC = () => {
   // const [presentAlert] = useIonAlert();
   const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [q, setQ] = useState('');
-  console.log('Ledger renders', { hasUser: Boolean(user), txnCount: items.length, loading });
+  console.log('Transactions renders', { hasUser: Boolean(user), txnCount: items.length, loading });
 
   useEffect(() => {
     if (!user?.uid) {
@@ -87,7 +89,6 @@ export const Ledger: React.FC = () => {
       const needle = q.trim().toLowerCase();
       list = list.filter((t) =>
         (t.category?.toLowerCase().includes(needle)) ||
-        (t.subcategory?.toLowerCase().includes(needle)) ||
         ((t.note ?? '').toLowerCase().includes(needle))
       );
     }
@@ -133,20 +134,11 @@ export const Ledger: React.FC = () => {
   return (
     <IonPage>
       <PageHeader
-        title={`${formatMonthYear(currentMonth)} Ledger`}
+        title="Transactions"
+        subtitle={formatMonthYear(currentMonth)}
         start={<ProBadge />}
-        end={(
-          <>
-            <IonButton onClick={prevMonth} aria-label="Previous month">
-              <IonIcon slot="icon-only" icon={chevronBackOutline} />
-            </IonButton>
-            <IonButton onClick={nextMonth} aria-label="Next month">
-              <IonIcon slot="icon-only" icon={chevronForwardOutline} />
-            </IonButton>
-          </>
-        )}
       />
-      <IonContent fullscreen className="ion-padding">
+      <IonContent fullscreen className="app-content">
         {/* Pull to refresh to re-subscribe */}
         <IonRefresher
           slot="fixed"
@@ -164,48 +156,82 @@ export const Ledger: React.FC = () => {
         >
           <IonRefresherContent />
         </IonRefresher>
-        <div className="ion-margin-bottom">
-          <IonSegment value={filter} onIonChange={(e) => setFilter((e.detail.value as any) ?? 'all')}>
-            <IonSegmentButton value="all">All</IonSegmentButton>
-            <IonSegmentButton value="income">Income</IonSegmentButton>
-            <IonSegmentButton value="expense">Expense</IonSegmentButton>
-          </IonSegment>
-          <IonSearchbar
-            className="search-compact"
-            value={q}
-            onIonInput={(e) => setQ(e.detail.value ?? '')}
-            debounce={250}
-            animated
-            placeholder="Search category, subcategory, note"
-            aria-label="Search transactions"
-          />
+        <section className="header-gradient">
+          <div className="h1">{formatMonthYear(currentMonth)}</div>
+          <p className="body">Filter, search, and review every move.</p>
+          <div className="stats-row">
+            <IonChip color="success">Income&nbsp;{formatCurrency(summary.income)}</IonChip>
+            <IonChip color="danger">Expense&nbsp;{formatCurrency(summary.expense)}</IonChip>
+            <IonChip color={summary.net >= 0 ? 'success' : 'danger'}>
+              Net&nbsp;{summary.net >= 0 ? '+' : '-'}
+              {formatCurrency(Math.abs(summary.net))}
+            </IonChip>
+          </div>
+        </section>
+
+        <div className="section-stack">
+          <IonCard>
+            <IonCardContent>
+              <div className="month-nav-card">
+                <IonButton onClick={prevMonth} aria-label="Previous month" fill="outline">
+                  <IonIcon slot="icon-only" icon={chevronBackOutline} />
+                </IonButton>
+                <div className="month-nav-card__label">{formatMonthYear(currentMonth)}</div>
+                <IonButton onClick={nextMonth} aria-label="Next month" fill="outline">
+                  <IonIcon slot="icon-only" icon={chevronForwardOutline} />
+                </IonButton>
+              </div>
+            </IonCardContent>
+          </IonCard>
+
+          <IonCard>
+            <IonCardHeader>
+              <IonCardTitle>Filters</IonCardTitle>
+            </IonCardHeader>
+            <IonCardContent>
+              <IonSegment value={filter} onIonChange={(e) => setFilter((e.detail.value as any) ?? 'all')}>
+                <IonSegmentButton value="all">All</IonSegmentButton>
+                <IonSegmentButton value="income">Income</IonSegmentButton>
+                <IonSegmentButton value="expense">Expense</IonSegmentButton>
+              </IonSegment>
+              <IonSearchbar
+                className="search-compact"
+                value={q}
+                onIonInput={(e) => setQ(e.detail.value ?? '')}
+                debounce={250}
+                animated
+                placeholder="Search category, note"
+                aria-label="Search transactions"
+              />
+            </IonCardContent>
+          </IonCard>
+
+          <IonCard>
+            <IonCardHeader>
+              <IonCardTitle>Summary</IonCardTitle>
+            </IonCardHeader>
+            <IonCardContent>
+              <div className="summary-grid">
+                <div>
+                  <h3>Income</h3>
+                  <p className="summary-value value-positive">+{formatCurrency(summary.income)}</p>
+                </div>
+                <div>
+                  <h3>Expense</h3>
+                  <p className="summary-value value-negative">-{formatCurrency(summary.expense)}</p>
+                </div>
+                <div>
+                  <h3>Net</h3>
+                  <p className="summary-value">
+                    {summary.net >= 0 ? '+' : '-'}
+                    {formatCurrency(Math.abs(summary.net))}
+                  </p>
+                </div>
+              </div>
+            </IonCardContent>
+          </IonCard>
+
         </div>
-        <IonGrid className="summary-grid">
-          <IonRow>
-            <IonCol>
-              <IonText color="success">
-                <h3>Income</h3>
-                <p className="summary-value">+{formatCurrency(summary.income)}</p>
-              </IonText>
-            </IonCol>
-            <IonCol>
-              <IonText color="danger">
-                <h3>Expense</h3>
-                <p className="summary-value">-{formatCurrency(summary.expense)}</p>
-              </IonText>
-            </IonCol>
-            <IonCol>
-              <IonText color={summary.net >= 0 ? 'success' : 'danger'}>
-                <h3>Net</h3>
-                <p className="summary-value">
-                  {summary.net >= 0
-                    ? `+${formatCurrency(summary.net)}`
-                    : `-${formatCurrency(Math.abs(summary.net))}`}
-                </p>
-              </IonText>
-            </IonCol>
-          </IonRow>
-        </IonGrid>
 
         {loading ? (
           <div className="ledger-loading">
@@ -226,19 +252,31 @@ export const Ledger: React.FC = () => {
         ) : null}
 
         {hasTransactions ? (
-          <IonList inset>
-            {groupedTransactions.map((group) => (
-              <DaySection
-                key={getDayKey(group.date)}
-                date={group.date}
-                items={group.items}
-                onView={handleView}
-              />
-            ))}
-          </IonList>
+          <IonCard>
+            <IonCardHeader>
+              <IonCardTitle>Transactions</IonCardTitle>
+            </IonCardHeader>
+            <IonCardContent>
+              <IonList inset={false}>
+                {groupedTransactions.map((group) => (
+                  <DaySection
+                    key={getDayKey(group.date)}
+                    date={group.date}
+                    items={group.items}
+                    onView={handleView}
+                  />
+                ))}
+              </IonList>
+            </IonCardContent>
+          </IonCard>
         ) : null}
 
-        <IonFab vertical="bottom" horizontal="end" slot="fixed" style={{ bottom: 'calc(var(--ion-safe-area-bottom, 0px) + 76px)' } as React.CSSProperties}>
+        <IonFab
+          vertical="bottom"
+          horizontal="end"
+          slot="fixed"
+          style={{ bottom: 'calc(var(--ion-safe-area-bottom, 0px) + 16px)' } as React.CSSProperties}
+        >
           <IonFabButton color="primary" onClick={handleAddClick} aria-label="Add transaction">
             <IonIcon icon={addOutline} />
           </IonFabButton>
