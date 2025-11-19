@@ -129,7 +129,7 @@ export const AppRouter: React.FC = () => {
               </IonContent>
             </IonMenu>
 
-            <IonRouterOutlet id="main-content" swipeGesture={true}>
+            <IonRouterOutlet id="main-content">
               <Route exact path="/" render={() => (
                 <PrivateRoute>
                   <Dashboard />
@@ -200,7 +200,7 @@ export const AppRouter: React.FC = () => {
             </IonRouterOutlet>
           </>
         ) : (
-          <IonRouterOutlet swipeGesture={true}>
+          <IonRouterOutlet>
             <Route exact path="/login" component={Login} />
             <Route exact path="/register" component={Register} />
             <Route render={() => <FallbackRedirect />} />

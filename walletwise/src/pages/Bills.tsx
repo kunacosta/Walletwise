@@ -16,6 +16,7 @@ import {
   IonSelectOption,
   IonModal,
   IonDatetime,
+  IonDatetimeButton,
   IonChip,
   IonBadge,
   IonIcon,
@@ -75,6 +76,7 @@ export const Bills: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ message: string; color: 'success' | 'danger' | 'medium' } | null>(null);
+  const [markingId, setMarkingId] = useState<string | null>(null);
 
   const openCreate = () => {
     const base = buildForm();
@@ -159,6 +161,42 @@ export const Bills: React.FC = () => {
     } catch (e: any) {
       setToast({ message: e?.message ?? 'Failed to delete bill', color: 'danger' });
       setSaving(false);
+    }
+  };
+
+  const handleMarkPaid = async (billId: string) => {
+    if (!uid) return;
+    const bill = bills.find((b) => b.id === billId);
+    if (!bill) return;
+    if (bill.status === 'paid') return;
+
+    setMarkingId(billId);
+    try {
+      const now = new Date();
+      if (bill.repeat === 'none') {
+        await updateBill(bill.id, {
+          status: 'paid',
+          lastPaidAt: now,
+        });
+      } else {
+        const currentDue = bill.dueDate;
+        let nextDue: Date;
+        if (bill.repeat === 'monthly') {
+          nextDue = new Date(currentDue.getFullYear(), currentDue.getMonth() + 1, currentDue.getDate());
+        } else {
+          nextDue = new Date(currentDue.getFullYear() + 1, currentDue.getMonth(), currentDue.getDate());
+        }
+        await updateBill(bill.id, {
+          status: 'unpaid',
+          lastPaidAt: now,
+          dueDate: nextDue,
+        });
+      }
+      setToast({ message: 'Bill marked as paid', color: 'success' });
+    } catch (e: any) {
+      setToast({ message: e?.message ?? 'Failed to mark bill as paid', color: 'danger' });
+    } finally {
+      setMarkingId(null);
     }
   };
 
@@ -286,6 +324,7 @@ export const Bills: React.FC = () => {
                 <IonList inset={false}>
                   {bills.map((b) => {
                     const accountName = accounts.find((a) => a.id === b.accountId)?.name ?? 'Account';
+                    const isPaid = b.status === 'paid';
                     return (
                       <IonItem
                         key={b.id}
@@ -307,6 +346,20 @@ export const Bills: React.FC = () => {
                         <IonBadge slot="end" color="warning">
                           <Money value={b.amount} />
                         </IonBadge>
+                        {!isPaid && (
+                          <IonButton
+                            slot="end"
+                            size="small"
+                            fill="clear"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              void handleMarkPaid(b.id);
+                            }}
+                            disabled={markingId === b.id}
+                          >
+                            {markingId === b.id ? 'Marking...' : 'Mark paid'}
+                          </IonButton>
+                        )}
                       </IonItem>
                     );
                   })}
@@ -316,12 +369,18 @@ export const Bills: React.FC = () => {
           </IonCard>
         </div>
 
-        <IonModal isOpen={isModalOpen} onDidDismiss={closeModal}>
-          <IonCard>
-            <IonCardHeader>
-              <IonCardTitle>{mode === 'create' ? 'Add bill' : 'Edit bill'}</IonCardTitle>
-            </IonCardHeader>
-            <IonCardContent style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+        <IonModal
+          isOpen={isModalOpen}
+          onDidDismiss={closeModal}
+          breakpoints={[0, 0.6, 0.95]}
+          initialBreakpoint={0.9}
+        >
+          <IonContent className="ion-padding">
+            <IonCard>
+              <IonCardHeader>
+                <IonCardTitle>{mode === 'create' ? 'Add bill' : 'Edit bill'}</IonCardTitle>
+              </IonCardHeader>
+              <IonCardContent>
               <IonList inset={false}>
                 <IonItem>
                   <IonLabel position="stacked">Name</IonLabel>
@@ -355,15 +414,14 @@ export const Bills: React.FC = () => {
                     ))}
                   </IonSelect>
                 </IonItem>
-                <IonItem>
+                <IonItem className="txn-date-item">
                   <IonLabel position="stacked">Due date</IonLabel>
-                  <IonDatetime
-                    presentation="date"
-                    value={form.dueIso}
-                    onIonChange={(e) =>
-                      setForm((f) => ({ ...f, dueIso: (e.detail.value as string) ?? f.dueIso }))
-                    }
-                  />
+                  <div className="txn-date-row">
+                    <IonDatetimeButton
+                      datetime="bill-due-date"
+                      className="txn-date-button"
+                    />
+                  </div>
                 </IonItem>
                 <IonItem>
                   <IonLabel position="stacked">Repeat</IonLabel>
@@ -408,6 +466,18 @@ export const Bills: React.FC = () => {
               </div>
             </IonCardContent>
           </IonCard>
+          </IonContent>
+        </IonModal>
+
+        <IonModal keepContentsMounted={true}>
+          <IonDatetime
+            id="bill-due-date"
+            presentation="date"
+            value={form.dueIso}
+            onIonChange={(e) =>
+              setForm((f) => ({ ...f, dueIso: (e.detail.value as string) ?? f.dueIso }))
+            }
+          />
         </IonModal>
 
         {toast ? (

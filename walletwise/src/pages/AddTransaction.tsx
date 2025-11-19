@@ -17,9 +17,10 @@ import {
   IonText,
   IonToast,
   IonNote,
+  IonSpinner,
 } from '@ionic/react';
 import { IonHeader, IonToolbar, IonTitle, IonInput, IonIcon } from '@ionic/react';
-import { backspaceOutline, calendarOutline } from 'ionicons/icons';
+import { backspaceOutline, calendarOutline, cameraOutline, locationOutline } from 'ionicons/icons';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Geolocation } from '@capacitor/geolocation';
 import { useAuthStore } from '../state/useAuthStore';
@@ -361,39 +362,62 @@ export const AddTransaction: React.FC = () => {
                     onIonInput={(e) => setNote(e.detail.value ?? '')}
                   />
                 </IonItem>
-                <IonItem>
-                  <IonLabel position="stacked">Receipt</IonLabel>
-                  <div className="add-txn-native-row">
-                    <IonButton size="small" onClick={handleCaptureReceipt}>
-                      Capture receipt
-                    </IonButton>
-                    <IonText color="medium">
-                      <p>{receiptUrl ? 'Receipt attached' : 'No receipt attached'}</p>
-                    </IonText>
-                  </div>
-                </IonItem>
-                <IonItem>
-                  <IonLabel position="stacked">Location</IonLabel>
-                  <div className="add-txn-native-row">
-                    <IonButton
-                      size="small"
-                      onClick={handleAttachLocation}
-                      disabled={locationLoading}
-                    >
-                      {locationLoading ? 'Detecting…' : 'Use current location'}
-                    </IonButton>
-                    <IonText color="medium">
-                      <p>
-                        {location
-                          ? `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`
-                          : 'No location attached'}
-                      </p>
-                    </IonText>
-                  </div>
-                </IonItem>
               </>
             )}
           </IonList>
+
+          {mode !== 'transfer' ? (
+            <div className="add-txn-card add-txn-attachments-card">
+              <div className="add-txn-attachments-header">
+                <div className="add-txn-attachments-title">Attachments</div>
+                <IonNote color="medium">Optional</IonNote>
+              </div>
+
+              <div className="add-txn-attachment-row">
+                <div className="add-txn-attachment-main">
+                  <IonIcon icon={cameraOutline} className="add-txn-attachment-icon" />
+                  <div className="add-txn-attachment-text">
+                    <div className="add-txn-attachment-label">Receipt photo</div>
+                    <div className="add-txn-attachment-status">
+                      {receiptUrl ? '1 photo attached' : 'No receipt attached'}
+                    </div>
+                  </div>
+                </div>
+                <IonButton size="small" fill="outline" onClick={handleCaptureReceipt}>
+                  {receiptUrl ? 'Retake' : 'Attach'}
+                </IonButton>
+              </div>
+
+              <div className="add-txn-attachment-row">
+                <div className="add-txn-attachment-main">
+                  <IonIcon icon={locationOutline} className="add-txn-attachment-icon" />
+                  <div className="add-txn-attachment-text">
+                    <div className="add-txn-attachment-label">Location</div>
+                    <div className="add-txn-attachment-status">
+                      {location
+                        ? `Saved (${location.lat.toFixed(4)}, ${location.lng.toFixed(4)})`
+                        : 'No location attached'}
+                    </div>
+                  </div>
+                </div>
+                <IonButton
+                  size="small"
+                  fill="outline"
+                  onClick={handleAttachLocation}
+                  disabled={locationLoading}
+                >
+                  {locationLoading ? (
+                    <>
+                      <IonSpinner name="dots" />
+                      <span style={{ marginLeft: 6 }}>Detecting…</span>
+                    </>
+                  ) : (
+                    'Use current'
+                  )}
+                </IonButton>
+              </div>
+            </div>
+          ) : null}
 
           <div className="add-txn-date-row">
             <IonButton
@@ -468,3 +492,4 @@ export const AddTransaction: React.FC = () => {
     </IonPage>
   );
 };
+

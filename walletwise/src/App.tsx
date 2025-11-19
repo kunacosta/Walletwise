@@ -9,7 +9,9 @@ import { useSettings } from './state/settings';
 import { ensurePermission, rescheduleAll } from './features/notifications/scheduler';
 import { useSyncStatus } from './state/useSyncStatus';
 
-setupIonicReact();
+setupIonicReact({
+  swipeBackEnabled: true,
+});
 
 const App: React.FC = () => {
   console.log('App renders');

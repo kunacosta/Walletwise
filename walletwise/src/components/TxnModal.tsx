@@ -245,7 +245,7 @@ export const TxnModal: React.FC<TxnModalProps> = ({
   };
 
   return (
-    <IonModal isOpen={isOpen} onDidDismiss={onDismiss} swipeToClose={false}>
+    <IonModal isOpen={isOpen} onDidDismiss={onDismiss}>
       <IonHeader>
         <IonToolbar>
           <IonButtons slot="start">
