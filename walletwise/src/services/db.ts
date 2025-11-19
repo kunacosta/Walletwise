@@ -57,6 +57,18 @@ const toFirestorePayload = (input: TransactionInput | TransactionPatch) => {
   if ('note' in input) {
     payload.note = input.note ?? null;
   }
+  if ('receiptUrl' in input) {
+    payload.receiptUrl = (input as any).receiptUrl ?? null;
+  }
+  if ('locationLat' in input) {
+    payload.locationLat = (input as any).locationLat ?? null;
+  }
+  if ('locationLng' in input) {
+    payload.locationLng = (input as any).locationLng ?? null;
+  }
+  if ('locationLabel' in input) {
+    payload.locationLabel = (input as any).locationLabel ?? null;
+  }
   if (input.date instanceof Date) {
     payload.date = Timestamp.fromDate(input.date);
   }
@@ -90,6 +102,13 @@ const mapTransaction = (snapshot: QueryDocumentSnapshot<DocumentData>): Transact
     category: String(data.category ?? ''),
     subcategory: data.subcategory ? String(data.subcategory) : undefined,
     note: typeof data.note === 'string' && data.note.length > 0 ? data.note : undefined,
+    receiptUrl: typeof data.receiptUrl === 'string' && data.receiptUrl.length > 0 ? data.receiptUrl : undefined,
+    locationLat: typeof data.locationLat === 'number' ? data.locationLat : undefined,
+    locationLng: typeof data.locationLng === 'number' ? data.locationLng : undefined,
+    locationLabel:
+      typeof data.locationLabel === 'string' && data.locationLabel.length > 0
+        ? data.locationLabel
+        : undefined,
     date: dateValue instanceof Timestamp ? dateValue.toDate() : (dateValue as Date),
     createdAt: convertTimestamp(data.createdAt),
     updatedAt: convertTimestamp(data.updatedAt),

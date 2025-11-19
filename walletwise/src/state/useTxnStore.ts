@@ -60,6 +60,10 @@ export const useTxnStore = create<TxnState>((set, get) => ({
         category: string;
         subcategory?: string;
         note?: string;
+        receiptUrl?: string;
+        locationLat?: number;
+        locationLng?: number;
+        locationLabel?: string;
         date: string;
         createdAt?: string | null;
         updatedAt?: string | null;
@@ -74,6 +78,10 @@ export const useTxnStore = create<TxnState>((set, get) => ({
           accountId: c.accountId ?? undefined,
           subcategory: c.subcategory ?? undefined,
           note: c.note,
+           receiptUrl: c.receiptUrl,
+           locationLat: c.locationLat,
+           locationLng: c.locationLng,
+           locationLabel: c.locationLabel,
           date: new Date(c.date),
           createdAt: c.createdAt ? new Date(c.createdAt) : null,
           updatedAt: c.updatedAt ? new Date(c.updatedAt) : null,
@@ -113,6 +121,10 @@ export const useTxnStore = create<TxnState>((set, get) => ({
             category: t.category,
             subcategory: t.subcategory ?? undefined,
             note: t.note,
+            receiptUrl: t.receiptUrl,
+            locationLat: t.locationLat,
+            locationLng: t.locationLng,
+            locationLabel: t.locationLabel,
             date: t.date.toISOString(),
             createdAt: t.createdAt ? t.createdAt.toISOString() : null,
             updatedAt: t.updatedAt ? t.updatedAt.toISOString() : null,

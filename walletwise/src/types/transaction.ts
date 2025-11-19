@@ -8,6 +8,13 @@ export interface Transaction {
   category: string;
   subcategory?: string;
   note?: string;
+  // Optional native-enhanced metadata
+  // Receipts captured via Camera / Filesystem
+  receiptUrl?: string;
+  // Location attached via Geolocation
+  locationLat?: number;
+  locationLng?: number;
+  locationLabel?: string;
   date: Date;
   createdAt?: Date | null;
   updatedAt?: Date | null;
@@ -22,6 +29,10 @@ export interface TransactionInput {
   category: string;
   subcategory?: string;
   note?: string;
+  receiptUrl?: string;
+  locationLat?: number;
+  locationLng?: number;
+  locationLabel?: string;
   date: Date;
 }
 

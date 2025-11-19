@@ -20,6 +20,8 @@ import {
 } from '@ionic/react';
 import { IonHeader, IonToolbar, IonTitle, IonInput, IonIcon } from '@ionic/react';
 import { backspaceOutline, calendarOutline } from 'ionicons/icons';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { Geolocation } from '@capacitor/geolocation';
 import { useAuthStore } from '../state/useAuthStore';
 import { useAccounts } from '../features/accounts/useAccounts';
 import { useCategories } from '../features/categories/useCategories';
@@ -53,6 +55,9 @@ export const AddTransaction: React.FC = () => {
   const [toast, setToast] = useState<{ message: string; color: 'success' | 'danger' } | null>(null);
   const [isDateOpen, setIsDateOpen] = useState<boolean>(false);
   const [dateEvent, setDateEvent] = useState<Event | undefined>(undefined);
+  const [receiptUrl, setReceiptUrl] = useState<string | undefined>(undefined);
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
 
   const dateLabel = useMemo(() => {
     try {
@@ -119,6 +124,46 @@ export const AddTransaction: React.FC = () => {
   const backspace = () => setAmountStr((prev) => (prev.length <= 1 ? '0' : prev.slice(0, -1)));
   const clear = () => setAmountStr('0');
 
+  const handleCaptureReceipt = async () => {
+    try {
+      const photo = await Camera.getPhoto({
+        quality: 70,
+        resultType: CameraResultType.Uri,
+        source: CameraSource.Camera,
+      });
+      const uri = photo.webPath ?? photo.path ?? null;
+      if (uri) {
+        setReceiptUrl(uri);
+        setToast({ message: 'Receipt attached', color: 'success' });
+      }
+    } catch (err) {
+      // user may cancel camera; treat silently
+      console.warn('Capture receipt failed', err);
+    }
+  };
+
+  const handleAttachLocation = async () => {
+    try {
+      setLocationLoading(true);
+      const perm = await Geolocation.checkPermissions();
+      if (perm.location !== 'granted') {
+        const req = await Geolocation.requestPermissions();
+        if (req.location !== 'granted') {
+          setToast({ message: 'Location permission denied', color: 'danger' });
+          return;
+        }
+      }
+      const pos = await Geolocation.getCurrentPosition();
+      setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      setToast({ message: 'Location attached', color: 'success' });
+    } catch (err) {
+      console.warn('Attach location failed', err);
+      setToast({ message: 'Unable to fetch location', color: 'danger' });
+    } finally {
+      setLocationLoading(false);
+    }
+  };
+
   const handleSave = async () => {
     const amount = parseFloat(amountStr);
     if (!accountId) {
@@ -157,6 +202,9 @@ export const AddTransaction: React.FC = () => {
           subcategory: '',
           note: note || undefined,
           date: new Date(dateIso),
+          receiptUrl: receiptUrl || undefined,
+          locationLat: location?.lat,
+          locationLng: location?.lng,
         };
         await addTransaction(payload);
         setToast({ message: 'Transaction added', color: 'success' });
@@ -312,6 +360,36 @@ export const AddTransaction: React.FC = () => {
                     placeholder="Optional notes"
                     onIonInput={(e) => setNote(e.detail.value ?? '')}
                   />
+                </IonItem>
+                <IonItem>
+                  <IonLabel position="stacked">Receipt</IonLabel>
+                  <div className="add-txn-native-row">
+                    <IonButton size="small" onClick={handleCaptureReceipt}>
+                      Capture receipt
+                    </IonButton>
+                    <IonText color="medium">
+                      <p>{receiptUrl ? 'Receipt attached' : 'No receipt attached'}</p>
+                    </IonText>
+                  </div>
+                </IonItem>
+                <IonItem>
+                  <IonLabel position="stacked">Location</IonLabel>
+                  <div className="add-txn-native-row">
+                    <IonButton
+                      size="small"
+                      onClick={handleAttachLocation}
+                      disabled={locationLoading}
+                    >
+                      {locationLoading ? 'Detecting…' : 'Use current location'}
+                    </IonButton>
+                    <IonText color="medium">
+                      <p>
+                        {location
+                          ? `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`
+                          : 'No location attached'}
+                      </p>
+                    </IonText>
+                  </div>
                 </IonItem>
               </>
             )}

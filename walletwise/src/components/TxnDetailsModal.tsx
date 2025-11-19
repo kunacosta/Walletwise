@@ -13,6 +13,7 @@ import {
   IonNote,
   IonText,
   IonToast,
+  IonImg,
 } from '@ionic/react';
 import type { Transaction } from '../types/transaction';
 import { formatDateTime, formatSignedAmount } from '../utils/format';
@@ -108,6 +109,31 @@ export const TxnDetailsModal: React.FC<TxnDetailsModalProps> = ({ isOpen, transa
               <p>{formatDateTime(transaction.date)}</p>
             </IonLabel>
           </IonItem>
+          {transaction.receiptUrl ? (
+            <IonItem>
+              <IonLabel>
+                <h3>Receipt</h3>
+                <IonImg src={transaction.receiptUrl} alt="Receipt image" />
+              </IonLabel>
+            </IonItem>
+          ) : null}
+          {transaction.locationLat !== undefined && transaction.locationLng !== undefined ? (
+            <IonItem
+              button
+              href={`https://www.google.com/maps?q=${transaction.locationLat},${transaction.locationLng}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <IonLabel>
+                <h3>Location</h3>
+                <p>
+                  {transaction.locationLabel
+                    ? transaction.locationLabel
+                    : `${transaction.locationLat.toFixed(4)}, ${transaction.locationLng.toFixed(4)}`}
+                </p>
+              </IonLabel>
+            </IonItem>
+          ) : null}
           {transaction.note ? (
             <IonItem>
               <IonLabel>

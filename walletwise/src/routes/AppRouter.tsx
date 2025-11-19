@@ -21,6 +21,7 @@ import { Register } from '../pages/Register';
 import { Transactions } from '../pages/Transactions';
 import { Settings } from '../pages/Settings';
 import { Analytics } from '../pages/Analytics';
+import { SpendingMap } from '../pages/SpendingMap';
 import { Accounts } from '../pages/Accounts';
 import { Bills } from '../pages/Bills';
 import { Dashboard } from '../pages/Dashboard';
@@ -40,6 +41,7 @@ import {
   notificationsOutline,
   personCircleOutline,
   timeOutline,
+  mapOutline,
 } from 'ionicons/icons';
 
 const FallbackRedirect: React.FC = () => {
@@ -100,6 +102,12 @@ export const AppRouter: React.FC = () => {
                     </IonItem>
                   </IonMenuToggle>
                   <IonMenuToggle>
+                    <IonItem routerLink="/spending-map" routerDirection="root">
+                      <IonIcon icon={mapOutline} slot="start" />
+                      <IonLabel>Spending Map</IonLabel>
+                    </IonItem>
+                  </IonMenuToggle>
+                  <IonMenuToggle>
                     <IonItem routerLink="/settings" routerDirection="root">
                       <IonIcon icon={settingsOutline} slot="start" />
                       <IonLabel>Settings</IonLabel>
@@ -121,7 +129,7 @@ export const AppRouter: React.FC = () => {
               </IonContent>
             </IonMenu>
 
-            <IonRouterOutlet id="main-content">
+            <IonRouterOutlet id="main-content" swipeGesture={true}>
               <Route exact path="/" render={() => (
                 <PrivateRoute>
                   <Dashboard />
@@ -168,6 +176,11 @@ export const AppRouter: React.FC = () => {
                   <Analytics />
                 </PrivateRoute>
               )} />
+              <Route exact path="/spending-map" render={() => (
+                <PrivateRoute>
+                  <SpendingMap />
+                </PrivateRoute>
+              )} />
               <Route exact path="/settings" render={() => (
                 <PrivateRoute>
                   <Settings />
@@ -187,7 +200,7 @@ export const AppRouter: React.FC = () => {
             </IonRouterOutlet>
           </>
         ) : (
-          <IonRouterOutlet>
+          <IonRouterOutlet swipeGesture={true}>
             <Route exact path="/login" component={Login} />
             <Route exact path="/register" component={Register} />
             <Route render={() => <FallbackRedirect />} />
